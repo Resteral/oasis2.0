@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Product Finder",
+  "version": "1.0.0",
+  "description": "Find products and stores near you.",
+  "permissions": [
+    "geolocation"
+  ],
+  "action": {
+    "default_popup": "index.html"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  }
+}
