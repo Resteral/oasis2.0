@@ -14,6 +14,7 @@ export default function Home() {
           </Link>
           <nav className={styles.nav}>
             <Link href="/shop/demo" className={styles.navLink}>Demo Store</Link>
+            <Link href="tel:5085070305" className={styles.navLink} style={{ marginRight: '1rem' }}>Contact Me</Link>
             <Link href="/login" className="btn btn-primary">Log In</Link>
           </nav>
         </div>
