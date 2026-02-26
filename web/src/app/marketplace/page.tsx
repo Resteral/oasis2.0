@@ -179,7 +179,7 @@ export default function Marketplace() {
                 {/* Header */}
                 <div className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-oasis-teal via-oasis-green to-oasis-yellow bg-clip-text text-transparent">
                             Marketplace
                         </h1>
                         <p className="text-gray-400">Find professionals, products, and services.</p>
@@ -187,11 +187,11 @@ export default function Marketplace() {
                     <div className="flex gap-4 items-center">
                         <Link href="/dashboard" className="text-gray-400 hover:text-white">Dashboard</Link>
                         {!user ? (
-                            <Link href="/auth" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold transition">
+                            <Link href="/auth" className="bg-oasis-teal hover:bg-oasis-teal-dark text-white px-4 py-2 rounded-lg font-bold transition">
                                 Sign In
                             </Link>
                         ) : (
-                            <Link href="/profile" className="text-yellow-500 hover:text-yellow-400 font-bold">
+                            <Link href="/profile" className="text-oasis-yellow hover:text-oasis-sand font-bold">
                                 {user.user_metadata?.full_name || 'My Profile'}
                             </Link>
                         )}
@@ -218,19 +218,19 @@ export default function Marketplace() {
                 <div className="flex gap-6 mb-8 border-b border-gray-700">
                     <button
                         onClick={() => setActiveTab('pros')}
-                        className={`pb-4 px-2 font-medium transition ${activeTab === 'pros' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-400 hover:text-white'}`}
+                        className={`pb-4 px-2 font-medium transition ${activeTab === 'pros' ? 'text-oasis-teal border-b-2 border-oasis-teal' : 'text-gray-400 hover:text-white'}`}
                     >
                         Pros & Businesses
                     </button>
                     <button
                         onClick={() => setActiveTab('products')}
-                        className={`pb-4 px-2 font-medium transition ${activeTab === 'products' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-400 hover:text-white'}`}
+                        className={`pb-4 px-2 font-medium transition ${activeTab === 'products' ? 'text-oasis-teal border-b-2 border-oasis-teal' : 'text-gray-400 hover:text-white'}`}
                     >
                         Find Products
                     </button>
                     <button
                         onClick={() => setActiveTab('radar')}
-                        className={`pb-4 px-2 font-medium transition ${activeTab === 'radar' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-400 hover:text-white'}`}
+                        className={`pb-4 px-2 font-medium transition ${activeTab === 'radar' ? 'text-oasis-teal border-b-2 border-oasis-teal' : 'text-gray-400 hover:text-white'}`}
                     >
                         Radar Map 🔭
                     </button>
@@ -309,7 +309,7 @@ export default function Marketplace() {
                                 <button
                                     onClick={handleSearch}
                                     disabled={loading}
-                                    className="bg-blue-600 px-6 py-2 rounded-lg font-bold disabled:opacity-50"
+                                    className="bg-oasis-teal hover:bg-oasis-teal-dark text-white px-6 py-2 rounded-lg font-bold disabled:opacity-50 transition"
                                 >
                                     {loading ? 'Searching...' : 'Find Nearby'}
                                 </button>
@@ -345,7 +345,7 @@ export default function Marketplace() {
                         {/* Google Shopping Results (SerpApi) */}
                         {googlePlaces.length > 0 && (
                             <div>
-                                <h3 className="text-xl font-bold mb-4 text-yellow-400">📍 Found in Nearby Stores</h3>
+                                <h3 className="text-xl font-bold mb-4 text-oasis-yellow">📍 Found in Nearby Stores</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {googlePlaces.map((place: GooglePlace, i: number) => {
                                         // Calculate distance if not provided

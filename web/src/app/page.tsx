@@ -16,8 +16,12 @@ export default function Home() {
           }}
         />
 
-        <div className="relative z-10">
-          <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent drop-shadow-lg">
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="mb-6 w-96 h-auto drop-shadow-2xl hover:scale-105 transition transform">
+            <img src="/oasis-logo.png" alt="Oasis Logo" className="w-full h-auto object-contain" />
+          </div>
+
+          <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-oasis-teal via-oasis-green to-oasis-yellow bg-clip-text text-transparent drop-shadow-lg">
             Oasis
           </h1>
           <p className="text-2xl md:text-3xl text-gray-200 mb-8 max-w-3xl drop-shadow-md font-medium">
@@ -25,10 +29,10 @@ export default function Home() {
           </p>
 
           <div className="flex gap-4 justify-center">
-            <Link href="/auth" className="bg-white text-gray-900 font-bold px-8 py-4 rounded-full text-lg hover:scale-105 transition transform shadow-lg">
+            <Link href="/auth" className="bg-oasis-teal text-white font-bold px-8 py-4 rounded-full text-lg hover:bg-oasis-teal-dark hover:scale-105 transition transform shadow-lg">
               Join Now
             </Link>
-            <Link href="/auth" className="bg-gray-900/80 border border-gray-500 backdrop-blur-sm font-bold px-8 py-4 rounded-full text-lg hover:bg-gray-800 transition shadow-lg">
+            <Link href="/auth" className="bg-gray-900/80 border border-oasis-sand backdrop-blur-sm font-bold px-8 py-4 rounded-full text-lg hover:bg-gray-800 text-oasis-sand transition shadow-lg">
               Sign In
             </Link>
           </div>
