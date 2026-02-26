@@ -31,7 +31,7 @@ export async function GET(request: Request) {
 
         // Transform Google Maps results
         // They typically have: title, gps_coordinates, address, thumbnail, data_id
-        const results: GooglePlace[] = (data.local_results || []).map((item: any) => ({
+        let results: GooglePlace[] = (data.local_results || []).map((item: any) => ({
             place_id: item.place_id || item.data_id,
             name: item.title,
             price: item.price, // Sometimes null in Maps
@@ -44,9 +44,55 @@ export async function GET(request: Request) {
             phone: item.phone // Phone number
         }))
 
+        if (lat && lng) {
+            const userLat = parseFloat(lat)
+            const userLng = parseFloat(lng)
+
+            results = results.map(r => {
+                let calcDist = 9999;
+                if (r.location?.latitude && r.location?.longitude) {
+                    calcDist = getDistanceFromLatLonInMiles(
+                        userLat, userLng,
+                        r.location.latitude, r.location.longitude
+                    )
+                    r.distance = `${calcDist.toFixed(1)} mi`
+                }
+                return { ...r, _calcDist: calcDist }
+            })
+
+            console.log("Results before filter:", results.map(r => ({ name: r.name, dist: (r as any)._calcDist })))
+
+            // Filter out places further than 50 miles and sort by distance
+            results = results
+                .filter(r => (r as any)._calcDist <= 50)
+                .sort((a, b) => (a as any)._calcDist - (b as any)._calcDist)
+                .map(r => {
+                    const { _calcDist, ...rest } = r as any;
+                    return rest as GooglePlace;
+                })
+
+            console.log("Results after filter:", results.length)
+        }
+
         return NextResponse.json({ results })
     } catch (error) {
         console.error(error)
         return NextResponse.json({ error: 'Failed to fetch places' }, { status: 500 })
     }
+}
+
+function getDistanceFromLatLonInMiles(lat1: number, lon1: number, lat2: number, lon2: number) {
+    const R = 3958.8; // Radius of the earth in miles
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in miles
+}
+
+function deg2rad(deg: number) {
+    return deg * (Math.PI / 180);
 }

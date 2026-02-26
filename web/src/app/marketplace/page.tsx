@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import RadarMap from '@/components/RadarMap'
 
 import { GooglePlace } from '@/types'
@@ -55,53 +56,89 @@ export default function Marketplace() {
 
     // Auth State
     const [user, setUser] = useState<any>(null)
+    const router = useRouter()
 
-    // Local Search Logic Only
+    // Local Search Logic Using Supabase
     const handleSearch = async () => {
         if (!searchQuery.trim()) return
         setLoading(true)
-        setGooglePlaces([])
+        setLocalProducts([])
 
-        // Only Google Places Search (Local)
         try {
-            const res = await fetch(`/api/places?query=${encodeURIComponent(searchQuery)}&lat=${userLocation?.lat}&lng=${userLocation?.lng}`)
-            const data = await res.json()
-            setGooglePlaces(data.results || [])
+            // Search via Supabase (Using ILIKE instead of full text search for simplicity)
+            const { data, error } = await supabase
+                .from('products')
+                .select(`
+                    id, name, description, price, image_url, category,
+                    business:businesses (
+                        id, name, location
+                    )
+                `)
+                .ilike('name', `%${searchQuery}%`)
+                .limit(20)
+
+            if (error) throw error
+            setLocalProducts(data || [])
+            setActiveTab('products') // Auto-switch to products tab on search
         } catch (e) {
             console.error(e)
-            alert('Failed to search local places')
+            alert('Failed to search local products')
         }
         setLoading(false)
     }
 
-    const handleOrder = async (place: GooglePlace) => {
+    const handleOrder = async (product: any, isSerpApiPlace: boolean = false) => {
         if (!user) {
-            alert('Please login to order delivery!')
+            alert('Please sign in to order delivery!')
+            router.push('/auth')
             return
         }
 
-        const confirm = window.confirm(`Request delivery for ${place.name}?\n\nThis will look for drivers near ${place.formatted_address}.`)
+        const itemName = isSerpApiPlace ? product.name : product.name;
+        const confirm = window.confirm(`Request delivery for ${itemName}?\n\nThis will include a $5 delivery fee.`)
         if (!confirm) return
 
         try {
-            const { error } = await supabase
-                .from('orders')
-                .insert({
-                    user_id: user.id,
-                    product_name: place.name,
-                    store_name: place.name,
-                    store_address: place.formatted_address,
-                    // store_location: place.location ? `POINT(${place.location.longitude} ${place.location.latitude})` : null, 
-                    // PostGIS insertion often requires specific format or casting. 
-                    // For now, let's stick to simple text/null or rely on lat/lng columns if we added them.
-                    // The schema has geography(POINT). Supabase JS handles WKT 'POINT(lng lat)' usually.
+            // Check subscription status
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('subscription_tier')
+                .eq('id', user.id)
+                .single()
 
-                    delivery_address: "My Saved Address", // Mock for now, or fetch from profile
-                    status: 'pending'
+            const isSubscribed = profile?.subscription_tier === 'premium'
+            const itemPrice = isSerpApiPlace ? 0 : parseFloat(product.price || 0)
+            const deliveryFee = 5.00
+            const total = itemPrice + deliveryFee
+
+            let orderData: any = {
+                consumer_id: user.id,
+                status: 'pending',
+                type: 'shipping',
+                total: total,
+                address: "My Saved Address", // Mock for now
+                items: [{ name: itemName, price: itemPrice }]
+            }
+
+            if (isSerpApiPlace) {
+                // SerpApi Mock Data
+                const { error } = await supabase.from('orders').insert({
+                    ...orderData,
+                    business_id: null, // Since we don't have a linked DB business
+                    customer_name: user?.user_metadata?.full_name || 'Customer'
                 })
+                if (error) throw error
+            } else {
+                // Supabase Real Product Data
+                const { error } = await supabase.from('orders').insert({
+                    ...orderData,
+                    business_id: product.business?.id,
+                    customer_name: user?.user_metadata?.full_name || 'Customer'
+                })
+                if (error) throw error
+            }
 
-            if (error) throw error
-            alert('Order Created! 🚚\nWaiting for a driver to accept.')
+            alert(`Order Created! 🚚\nTotal: $${total.toFixed(2)}\nWaiting for a driver to accept.`)
         } catch (e: any) {
             console.error(e)
             alert('Failed to create order: ' + e.message)
@@ -147,7 +184,18 @@ export default function Marketplace() {
                         </h1>
                         <p className="text-gray-400">Find professionals, products, and services.</p>
                     </div>
-                    <Link href="/dashboard" className="text-gray-400 hover:text-white">Back to Dashboard</Link>
+                    <div className="flex gap-4 items-center">
+                        <Link href="/dashboard" className="text-gray-400 hover:text-white">Dashboard</Link>
+                        {!user ? (
+                            <Link href="/auth" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold transition">
+                                Sign In
+                            </Link>
+                        ) : (
+                            <Link href="/profile" className="text-yellow-500 hover:text-yellow-400 font-bold">
+                                {user.user_metadata?.full_name || 'My Profile'}
+                            </Link>
+                        )}
+                    </div>
                 </div>
 
                 {/* Featured Ads Carousel */}
@@ -282,8 +330,10 @@ export default function Marketplace() {
                                             <div className="text-green-400 font-bold">${product.price}</div>
                                             <p className="text-xs text-gray-400 line-clamp-2 mt-1">{product.description}</p>
                                             <div className="flex gap-2 mt-3">
-                                                <button className="flex-1 bg-blue-600/20 text-blue-400 py-1 rounded text-xs font-bold border border-blue-600/50">
-                                                    Order / Chat
+                                                <button
+                                                    onClick={() => handleOrder(product, false)}
+                                                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-1 rounded text-xs font-bold transition">
+                                                    Order Delivery
                                                 </button>
                                             </div>
                                         </div>
@@ -331,7 +381,7 @@ export default function Marketplace() {
                                                 </div>
                                                 <div className="flex flex-col gap-2 self-center">
                                                     <button
-                                                        onClick={() => handleOrder(place)}
+                                                        onClick={() => handleOrder(place, true)}
                                                         className="text-xs bg-green-600 hover:bg-green-700 h-8 px-3 rounded flex items-center justify-center font-bold transition"
                                                     >
                                                         Order 🚚

@@ -7,6 +7,7 @@ create table public.profiles (
   full_name text,
   avatar_url text,
   role text check (role in ('business', 'consumer')) default 'consumer',
+  subscription_tier text default 'free',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -113,4 +114,3 @@ create policy "Anyone can create an order." on public.orders for insert with che
 create extension if not exists pg_trgm;
 create index products_name_trgm_idx on public.products using gin (name gin_trgm_ops);
 create index businesses_category_idx on public.businesses (category);
-w
