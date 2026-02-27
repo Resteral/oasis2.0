@@ -10,6 +10,8 @@ export default function AiDiscoveryModal() {
     const [distance, setDistance] = useState(5);
     const [delivery, setDelivery] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
+    const [results, setResults] = useState<any[]>([]);
+    const [aiInsight, setAiInsight] = useState('');
 
     const handleOpen = () => {
         setIsOpen(true);
@@ -28,17 +30,23 @@ export default function AiDiscoveryModal() {
 
     const handleSearch = async () => {
         setIsSearching(true);
-        // Simulate AI "Thinking"
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        // Redirect to search/shop page with params
-        // For now, we'll just alert or console log since search page isn't fully spec'd
-        // Or redirect to a demo search results page
-        // router.push(`/search?q=${query}&dist=${distance}&delivery=${delivery}`);
-
-        // Mock result display in modal for now
-        setStep(3);
-        setIsSearching(false);
+        try {
+            const res = await fetch('/api/ai/discover', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query, distance, delivery })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setResults(data.matches || []);
+                setAiInsight(data.ai_insight || `We found ${data.matches?.length || 0} matches for "${query}"`);
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setStep(3);
+            setIsSearching(false);
+        }
     };
 
     if (!isOpen) {
@@ -200,19 +208,25 @@ export default function AiDiscoveryModal() {
                 {step === 3 && (
                     <div style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔮</div>
-                        <h3>We found 3 matches for "{query}"</h3>
+                        <h3>{aiInsight || `We found ${results.length} matches for "${query}"`}</h3>
                         <p style={{ color: '#666', marginBottom: '2rem' }}>Within {distance} miles {delivery ? '(Delivery Available)' : ''}</p>
 
                         <div style={{ textAlign: 'left', marginBottom: '2rem', maxHeight: '300px', overflowY: 'auto' }}>
-                            {/* Mock Results */}
-                            <div style={{ padding: '1rem', border: '1px solid #eee', marginBottom: '1rem', borderRadius: '8px' }}>
-                                <strong>Oasis Coffee Co.</strong>
-                                <p style={{ fontSize: '0.9rem', color: '#666' }}>Premium blends... • 1.2 mi</p>
-                            </div>
-                            <div style={{ padding: '1rem', border: '1px solid #eee', marginBottom: '1rem', borderRadius: '8px' }}>
-                                <strong>Downtown Gym</strong>
-                                <p style={{ fontSize: '0.9rem', color: '#666' }}>Fitness Center • 3.5 mi</p>
-                            </div>
+                            {results.length > 0 ? results.map((business, index) => (
+                                <div
+                                    key={business.id || index}
+                                    style={{ padding: '1rem', border: '1px solid #eee', marginBottom: '1rem', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: '#f9f9f9' }}
+                                    onClick={() => router.push(`/shop/${business.slug || business.id}`)}
+                                >
+                                    <strong>{business.name}</strong>
+                                    <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '4px' }}>
+                                        {business.description ? `${business.description.substring(0, 50)}... ` : ''}
+                                        • {business.location || 'Local'}
+                                    </p>
+                                </div>
+                            )) : (
+                                <p style={{ textAlign: 'center', color: '#666' }}>No exact matches found.</p>
+                            )}
                         </div>
 
                         <button

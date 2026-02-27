@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import styles from './page.module.css';
 import Cart from '@/components/Cart';
+import MessageModal from '@/components/MessageModal';
 import { Business } from '@/lib/types';
 
 interface ShopClientProps {
@@ -12,6 +13,7 @@ interface ShopClientProps {
 
 export default function ShopClient({ business, products, posts }: ShopClientProps) {
     const theme = business.theme || { primaryColor: '#000000', backgroundColor: '#ffffff' };
+    const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
 
     // Derived styles for dynamic theme
     const sectionStyle = {
@@ -42,7 +44,7 @@ export default function ShopClient({ business, products, posts }: ShopClientProp
                     <p className={styles.tagline}>{business.description || "Welcome to our store!"}</p>
                     <div className={styles.heroActions}>
                         <button className="btn btn-primary" style={{ backgroundColor: theme.primaryColor }}>Start Order</button>
-                        <button className="btn glass">Contact Us</button>
+                        <button className="btn glass" onClick={() => setIsMessageModalOpen(true)}>Contact Us</button>
                     </div>
                 </div>
             </div>
@@ -62,7 +64,7 @@ export default function ShopClient({ business, products, posts }: ShopClientProp
                         )}
                         <div className={styles.contactMethods}>
                             <button className="btn btn-outline" style={{ borderColor: theme.primaryColor, color: theme.primaryColor }}>Call Now</button>
-                            <button className="btn btn-outline" style={{ borderColor: theme.primaryColor, color: theme.primaryColor }}>Message</button>
+                            <button className="btn btn-outline" style={{ borderColor: theme.primaryColor, color: theme.primaryColor }} onClick={() => setIsMessageModalOpen(true)}>Message</button>
                         </div>
                     </div>
                 </div>
@@ -132,6 +134,14 @@ export default function ShopClient({ business, products, posts }: ShopClientProp
             </div>
 
             <Cart />
+
+            <MessageModal
+                isOpen={isMessageModalOpen}
+                onClose={() => setIsMessageModalOpen(false)}
+                businessId={business.id}
+                businessName={business.name}
+                theme={theme}
+            />
         </div>
     );
 }

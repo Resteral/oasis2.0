@@ -31,6 +31,12 @@ export default function DashboardOverview() {
 
             const { data: business } = await supabase.from('businesses').select('id, name').eq('owner_id', user.id).single();
 
+            if (!business) {
+                // If they don't have a business set up, force them to onboarding
+                window.location.href = '/dashboard/onboarding';
+                return;
+            }
+
             if (business) {
                 // 1. Fetch Basic Stats
                 const { count: orderCount } = await supabase.from('orders').select('*', { count: 'exact', head: true }).eq('business_id', business.id);
