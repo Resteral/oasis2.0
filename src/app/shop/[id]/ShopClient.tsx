@@ -204,17 +204,6 @@ export default function ShopClient({ business, products, posts }: ShopClientProp
                                     <span className={styles.price} style={{ color: theme.primaryColor }}>${product.price}</span>
                                 </div>
                                 <p className={styles.description}>{product.description}</p>
-<<<<<<< HEAD
-                                <button
-                                    className="btn btn-primary"
-                                    style={{ width: '100%', marginTop: 'auto', backgroundColor: theme.primaryColor }}
-                                    onClick={() => {
-                                        window.dispatchEvent(new CustomEvent('add-to-cart', { detail: product }));
-                                    }}
-                                >
-                                    Add to Cart
-                                </button>
-=======
                                 <div className="mt-auto">
                                     {product.stock > 0 ? (
                                         <button
@@ -231,7 +220,6 @@ export default function ShopClient({ business, products, posts }: ShopClientProp
                                         <p className="text-[10px] text-red-500 mt-1 font-bold">Only {product.stock} left!</p>
                                     )}
                                 </div>
->>>>>>> 41c0e56 (feat: implement fulfillment dashboard and unified checkout with inventory sync)
                             </div>
                         </div>
                     )) : (
@@ -241,34 +229,7 @@ export default function ShopClient({ business, products, posts }: ShopClientProp
                     )}
                 </div>
 
-<<<<<<< HEAD
-                {/* Business Feed (Shoutouts) */}
-                <BusinessFeed businessId={business.id} />
-            </div>
-
-            <Cart businessId={business.id} />
-
-            {isMessageModalOpen && currentUser && (
-                <ChatInterface
-                    customerId={currentUser.id}
-                    businessId={business.id}
-                    senderId={currentUser.id}
-                    businessName={business.name}
-                    onClose={() => setIsMessageModalOpen(false)}
-                />
-            )}
-
-            {selectedProduct && (
-                <ReviewModal
-                    isOpen={isReviewModalOpen}
-                    onClose={() => setIsReviewModalOpen(false)}
-                    businessId={business.id}
-                    productId={selectedProduct.id}
-                    productName={selectedProduct.name}
-                    theme={theme}
-                />
-            )}
-=======
+                {/* News & Events Section */}
                 {posts && posts.length > 0 && (
                     <div className={styles.postsSection} style={{ marginTop: '3rem', marginBottom: '3rem' }}>
                         <h2 className={styles.sectionTitle}>Latest News & Events</h2>
@@ -308,10 +269,33 @@ export default function ShopClient({ business, products, posts }: ShopClientProp
                         </div>
                     </div>
                 )}
+
+                {/* Business Feed (Shoutouts) */}
+                <BusinessFeed businessId={business.id} />
             </div>
 
             <Cart businessId={business.id} items={cartItems} setItems={setCartItems} />
->>>>>>> 41c0e56 (feat: implement fulfillment dashboard and unified checkout with inventory sync)
+
+            {isMessageModalOpen && currentUser && (
+                <ChatInterface
+                    customerId={currentUser.id}
+                    businessId={business.id}
+                    senderId={currentUser.id}
+                    businessName={business.name}
+                    onClose={() => setIsMessageModalOpen(false)}
+                />
+            )}
+
+            {selectedProduct && (
+                <ReviewModal
+                    isOpen={isReviewModalOpen}
+                    onClose={() => setIsReviewModalOpen(false)}
+                    businessId={business.id}
+                    productId={selectedProduct.id}
+                    productName={selectedProduct.name}
+                    theme={theme}
+                />
+            )}
         </div>
     );
 }
