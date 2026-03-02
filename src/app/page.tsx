@@ -51,8 +51,7 @@ export default function Home() {
       <header className={styles.header}>
         <div className="container px-6 mx-auto flex justify-between items-center">
           <Link href="/" className={styles.logo} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img src="/logo.png" alt="OasisUnited" style={{ height: '42px', width: 'auto', filter: 'brightness(1.2)' }} />
-            <span className="font-black tracking-tight text-2xl">OasisUnited</span>
+            <img src="/logo.png" alt="OasisUnited" style={{ height: '42px', width: 'auto', filter: 'brightness(1.5)' }} className="dark-invert-if-needed" />
           </Link>
           <nav className={styles.nav}>
             <Link href="/marketplace" className="px-5 py-2.5 bg-white/5 text-white/80 rounded-full font-bold text-xs tracking-widest uppercase hover:bg-white/10 transition-all border border-white/10">Marketplace</Link>
@@ -157,8 +156,7 @@ export default function Home() {
       <footer className={styles.footer}>
         <div className="container mx-auto px-6 text-center">
           <div className="flex items-center justify-center gap-4 mb-8">
-            <img src="/logo.png" alt="OasisUnited" style={{ height: '32px', width: 'auto', opacity: 0.8 }} />
-            <span className="font-black text-white/90">OasisUnited</span>
+            <img src="/logo.png" alt="OasisUnited" style={{ height: '48px', width: 'auto', opacity: 0.8, filter: 'brightness(1.5)' }} />
           </div>
           <p className="mb-8">&copy; 2026 OasisUnited. The premium standard for local commerce.</p>
           <div className="flex justify-center gap-8">
