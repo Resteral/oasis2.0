@@ -1,0 +1,62 @@
+﻿src/app/dashboard/orders/page.tsx(42,1): error TS1185: Merge conflict marker encountered.
+src/app/dashboard/orders/page.tsx(73,1): error TS1185: Merge conflict marker encountered.
+src/app/dashboard/orders/page.tsx(97,1): error TS1185: Merge conflict marker encountered.
+src/app/dashboard/orders/page.tsx(101,1): error TS1185: Merge conflict marker encountered.
+src/app/dashboard/orders/page.tsx(135,10): error TS17008: JSX element 'div' has no corresponding closing tag.
+src/app/dashboard/orders/page.tsx(242,14): error TS17008: JSX element 'div' has no corresponding closing tag.
+src/app/dashboard/orders/page.tsx(260,85): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/dashboard/orders/page.tsx(261,9): error TS1109: Expression expected.
+src/app/dashboard/orders/page.tsx(261,38): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/dashboard/orders/page.tsx(267,29): error TS1005: '}' expected.
+src/app/dashboard/orders/page.tsx(267,41): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/app/dashboard/orders/page.tsx(271,63): error TS1005: '}' expected.
+src/app/dashboard/orders/page.tsx(273,9): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/app/dashboard/orders/page.tsx(276,33): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/dashboard/orders/page.tsx(276,68): error TS1005: '}' expected.
+src/app/dashboard/orders/page.tsx(276,80): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/app/dashboard/orders/page.tsx(283,99): error TS1005: '}' expected.
+src/app/dashboard/orders/page.tsx(284,9): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/app/dashboard/orders/page.tsx(287,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/app/dashboard/orders/page.tsx(360,1): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/dashboard/orders/page.tsx(360,2): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/dashboard/orders/page.tsx(360,3): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/dashboard/orders/page.tsx(360,4): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/dashboard/orders/page.tsx(360,5): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/dashboard/orders/page.tsx(360,6): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/dashboard/orders/page.tsx(360,7): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/dashboard/orders/page.tsx(364,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/app/dashboard/orders/page.tsx(365,1): error TS1005: '</' expected.
+src/app/dashboard/settings/page.tsx(297,27): error TS1005: '</' expected.
+src/app/dashboard/settings/page.tsx(298,1): error TS1185: Merge conflict marker encountered.
+src/app/dashboard/settings/page.tsx(299,1): error TS1185: Merge conflict marker encountered.
+src/app/dashboard/settings/page.tsx(421,1): error TS1185: Merge conflict marker encountered.
+src/app/dashboard/settings/page.tsx(422,17): error TS1128: Declaration or statement expected.
+src/app/dashboard/settings/page.tsx(425,22): error TS1005: ';' expected.
+src/app/dashboard/settings/page.tsx(426,21): error TS2657: JSX expressions must have one parent element.
+src/app/dashboard/settings/page.tsx(520,17): error TS1128: Declaration or statement expected.
+src/app/dashboard/settings/page.tsx(523,22): error TS1005: ';' expected.
+src/app/dashboard/settings/page.tsx(524,21): error TS2657: JSX expressions must have one parent element.
+src/app/dashboard/settings/page.tsx(606,17): error TS1128: Declaration or statement expected.
+src/app/dashboard/settings/page.tsx(609,22): error TS1005: ';' expected.
+src/app/dashboard/settings/page.tsx(623,17): error TS1128: Declaration or statement expected.
+src/app/dashboard/settings/page.tsx(624,13): error TS1109: Expression expected.
+src/app/dashboard/settings/page.tsx(625,9): error TS1109: Expression expected.
+src/app/dashboard/settings/page.tsx(626,5): error TS1109: Expression expected.
+src/app/marketplace/page.tsx(1,1): error TS1185: Merge conflict marker encountered.
+src/app/marketplace/page.tsx(44,10): error TS17008: JSX element 'div' has no corresponding closing tag.
+src/app/marketplace/page.tsx(213,10): error TS1005: '}' expected.
+src/app/marketplace/page.tsx(215,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/app/marketplace/page.tsx(218,5): error TS1109: Expression expected.
+src/app/marketplace/page.tsx(221,17): error TS1005: '}' expected.
+src/app/marketplace/page.tsx(221,36): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/app/marketplace/page.tsx(228,41): error TS1005: '}' expected.
+src/app/marketplace/page.tsx(228,49): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/app/marketplace/page.tsx(233,1): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/marketplace/page.tsx(233,2): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/marketplace/page.tsx(233,3): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/marketplace/page.tsx(233,4): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/marketplace/page.tsx(233,5): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/marketplace/page.tsx(233,6): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/marketplace/page.tsx(233,7): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/marketplace/page.tsx(236,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/app/marketplace/page.tsx(237,1): error TS1005: '</' expected.

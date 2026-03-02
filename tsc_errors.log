@@ -1,0 +1,4 @@
+src/app/dashboard/settings/page.tsx(5,31): error TS2307: Cannot find module '@paypal/react-paypal-js' or its corresponding type declarations.
+src/app/layout.tsx(9,24): error TS2304: Cannot find name 'Metadata'.
+src/components/Cart.tsx(4,31): error TS2307: Cannot find module '@paypal/react-paypal-js' or its corresponding type declarations.
+src/components/PayPalProvider.tsx(2,38): error TS2307: Cannot find module '@paypal/react-paypal-js' or its corresponding type declarations.

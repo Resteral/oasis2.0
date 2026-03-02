@@ -39,66 +39,45 @@ const channelColors: Record<string, string> = {
 export default function OrdersPage() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
-<<<<<<< HEAD
     const [dateRange, setDateRange] = useState({ start: '', end: '' });
+    const [businessId, setBusinessId] = useState<string | null>(null);
 
     const fetchOrders = async () => {
         setLoading(true);
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        let query = supabase
-            .from('orders')
-            .select('*')
-            .order('created_at', { ascending: false });
+        const { data: business } = await supabase.from('businesses').select('id').eq('owner_id', user.id).single();
 
-        if (dateRange.start) {
-            query = query.gte('created_at', dateRange.start);
-        }
-        if (dateRange.end) {
-            const end = new Date(dateRange.end);
-            end.setHours(23, 59, 59, 999);
-            query = query.lte('created_at', end.toISOString());
-        }
+        if (business) {
+            setBusinessId(business.id);
+            let query = supabase
+                .from('orders')
+                .select('*')
+                .eq('business_id', business.id)
+                .order('created_at', { ascending: false });
 
-        const { data, error } = await query;
+            if (dateRange.start) {
+                query = query.gte('created_at', dateRange.start);
+            }
+            if (dateRange.end) {
+                const end = new Date(dateRange.end);
+                end.setHours(23, 59, 59, 999);
+                query = query.lte('created_at', end.toISOString());
+            }
 
-        if (!error && data) {
-            setOrders(data);
+            const { data, error } = await query;
+            if (!error && data) {
+                setOrders(data as Order[]);
+            }
         }
         setLoading(false);
     };
 
     useEffect(() => {
-=======
-    const [businessId, setBusinessId] = useState<string | null>(null);
-
-    useEffect(() => {
-        async function fetchOrders() {
-            setLoading(true);
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-
-            const { data: business } = await supabase.from('businesses').select('id').eq('owner_id', user.id).single();
-            if (business) {
-                setBusinessId(business.id);
-                const { data, error } = await supabase
-                    .from('orders')
-                    .select('*')
-                    .eq('business_id', business.id)
-                    .order('created_at', { ascending: false });
-
-                if (!error && data) {
-                    setOrders(data as Order[]);
-                }
-            }
-            setLoading(false);
-        }
->>>>>>> 41c0e56 (feat: implement fulfillment dashboard and unified checkout with inventory sync)
         fetchOrders();
     }, [dateRange]);
 
-<<<<<<< HEAD
     const handleExportCSV = () => {
         if (orders.length === 0) return;
 
@@ -127,6 +106,35 @@ export default function OrdersPage() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    };
+
+    const handleStatusChange = async (orderId: string, newStatus: Order['status']) => {
+        const order = orders.find(o => o.id === orderId);
+        if (!order || !businessId) return;
+
+        // 1. Update DB
+        const { error } = await supabase
+            .from('orders')
+            .update({ status: newStatus })
+            .eq('id', orderId);
+
+        if (error) {
+            alert('Failed to update status: ' + error.message);
+            return;
+        }
+
+        // 2. Local State Update
+        setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+
+        // 3. Automation Notify (Phase 25)
+        await AutomationService.notifyOrderUpdate(order, newStatus);
+
+        // 4. Analytics Track (Phase 23/25)
+        if (newStatus === 'completed') {
+            await trackEvent(businessId, 'conversion', { amount: order.total, order_id: orderId });
+        }
+
+        alert(`Order status updated to ${newStatus}. Customer has been notified.`);
     };
 
     if (loading) return <div className="p-12 text-gray-400 font-black animate-pulse uppercase tracking-widest text-center">Loading Orders...</div>;
@@ -189,7 +197,6 @@ export default function OrdersPage() {
                                 <th className="px-8 py-5 text-[10px] font-black tracking-widest text-gray-400 uppercase">Channel</th>
                                 <th className="px-8 py-5 text-[10px] font-black tracking-widest text-gray-400 uppercase">Total</th>
                                 <th className="px-8 py-5 text-[10px] font-black tracking-widest text-gray-400 uppercase">Status</th>
-                                <th className="px-8 py-5 text-[10px] font-black tracking-widest text-gray-400 uppercase text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -204,30 +211,34 @@ export default function OrdersPage() {
                                     <td className="px-8 py-6">
                                         <div className="font-bold text-gray-900">{order.customer_name || 'Guest User'}</div>
                                         {order.customer_contact && <div className="text-xs text-gray-400 font-medium mt-0.5">{order.customer_contact}</div>}
+                                        {order.delivery_type === 'delivery' && order.address && (
+                                            <div className="text-[10px] text-indigo-400 mt-1 uppercase font-bold">📍 {order.address}</div>
+                                        )}
                                     </td>
                                     <td className="px-8 py-6">
                                         <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest border border-solid ${channelColors[order.channel?.toLowerCase()] || channelColors.web}`}>
-                                            {(order.channel || 'WEB').toUpperCase()}
+                                            {(CHANNEL_LABELS[order.channel] || order.channel?.toUpperCase())}
                                         </span>
                                     </td>
                                     <td className="px-8 py-6">
                                         <div className="text-lg font-black text-gray-900">${Number(order.total).toFixed(2)}</div>
                                     </td>
                                     <td className="px-8 py-6">
-                                        <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest border border-solid ${statusColors[order.status?.toLowerCase()] || 'bg-gray-50 text-gray-600 border-gray-100'}`}>
-                                            {(order.status || 'PENDING').toUpperCase()}
-                                        </span>
-                                    </td>
-                                    <td className="px-8 py-6 text-right">
-                                        <button className="text-xs font-black text-indigo-600 hover:text-indigo-800 tracking-widest uppercase transition-colors">
-                                            Manage Order →
-                                        </button>
+                                        <select
+                                            className={`text-xs font-bold border rounded-lg p-2 ${statusColors[order.status] || ''}`}
+                                            value={order.status}
+                                            onChange={(e) => handleStatusChange(order.id, e.target.value as Order['status'])}
+                                        >
+                                            {Object.entries(STATUS_LABELS).map(([val, label]) => (
+                                                <option key={val} value={val}>{label}</option>
+                                            ))}
+                                        </select>
                                     </td>
                                 </tr>
                             ))}
                             {orders.length === 0 && (
                                 <tr>
-                                    <td colSpan={6} className="px-8 py-32 text-center">
+                                    <td colSpan={5} className="px-8 py-32 text-center">
                                         <div className="text-4xl mb-4">🛒</div>
                                         <div className="text-lg font-black text-gray-900">No orders yet</div>
                                         <p className="text-gray-400 mt-1">Your store activity will appear here once customers start ordering.</p>
@@ -256,108 +267,6 @@ export default function OrdersPage() {
                         View Reports
                     </button>
                 </div>
-=======
-    const handleStatusChange = async (orderId: string, newStatus: Order['status']) => {
-        const order = orders.find(o => o.id === orderId);
-        if (!order || !businessId) return;
-
-        // 1. Update DB
-        const { error } = await supabase
-            .from('orders')
-            .update({ status: newStatus })
-            .eq('id', orderId);
-
-        if (error) {
-            alert('Failed to update status: ' + error.message);
-            return;
-        }
-
-        // 2. Local State Update
-        setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
-
-        // 3. Automation Notify (Phase 25)
-        await AutomationService.notifyOrderUpdate(order, newStatus);
-
-        // 4. Analytics Track (Phase 23/25)
-        if (newStatus === 'completed') {
-            await trackEvent(businessId, 'conversion', { amount: order.total, order_id: orderId });
-        }
-
-        alert(`Order status updated to ${newStatus}. Customer has been notified.`);
-    };
-
-    if (loading) return <div className={styles.container}><div className={styles.emptyState}>Loading the fulfillment dashboard...</div></div>;
-
-    return (
-        <div className={styles.container}>
-            <div className={styles.header}>
-                <div>
-                    <h1 className={styles.title}>Fulfillment Dashboard</h1>
-                    <p className={styles.subtitle}>Manage your order lifecycle and customer deliveries.</p>
-                </div>
-            </div>
-
-            <div className={styles.tableCard}>
-                <table className={styles.table}>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Customer</th>
-                            <th>Channel</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {orders.length === 0 ? (
-                            <tr>
-                                <td colSpan={6} className={styles.emptyState}>
-                                    No orders found. Once customers start ordering, they'll appear here.
-                                </td>
-                            </tr>
-                        ) : (
-                            orders.map(order => (
-                                <tr key={order.id}>
-                                    <td>
-                                        <div className="text-sm font-medium">{new Date(order.created_at).toLocaleDateString()}</div>
-                                        <div className="text-[10px] text-gray-400">{new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                                    </td>
-                                    <td>
-                                        <div className={styles.customerName}>{order.customer_name || 'Anonymous Guest'}</div>
-                                        <div className={styles.customerContact}>{order.customer_contact || 'No contact provided'}</div>
-                                        {order.delivery_type === 'delivery' && order.address && (
-                                            <div className="text-[10px] text-indigo-400 mt-1 uppercase font-bold">📍 {order.address}</div>
-                                        )}
-                                    </td>
-                                    <td>
-                                        <span className={styles['channel-tag']}>
-                                            {CHANNEL_LABELS[order.channel] || order.channel?.toUpperCase()}
-                                        </span>
-                                    </td>
-                                    <td className={styles.amount}>${Number(order.total).toFixed(2)}</td>
-                                    <td>
-                                        <span className={`${styles.badge} ${styles['status-' + order.status]}`}>
-                                            {STATUS_LABELS[order.status]}
-                                        </span>
-                                    </td>
-                                    <td className={styles.actions}>
-                                        <select
-                                            className={styles.select}
-                                            value={order.status}
-                                            onChange={(e) => handleStatusChange(order.id, e.target.value as Order['status'])}
-                                        >
-                                            {Object.entries(STATUS_LABELS).map(([val, label]) => (
-                                                <option key={val} value={val}>{label}</option>
-                                            ))}
-                                        </select>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
->>>>>>> 41c0e56 (feat: implement fulfillment dashboard and unified checkout with inventory sync)
             </div>
         </div>
     );

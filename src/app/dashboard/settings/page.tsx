@@ -217,12 +217,17 @@ export default function SettingsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         <div className="space-y-3">
                             <label className="block text-sm font-bold text-gray-700 uppercase tracking-wide">Delivery Radius (Miles)</label>
-                            <input
-                                type="number"
-                                value={deliveryRadius}
-                                onChange={e => setDeliveryRadius(Number(e.target.value))}
-                                className="w-full p-4 border border-gray-100 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none font-medium"
-                            />
+                            <div className="flex items-center gap-4">
+                                <input
+                                    type="range"
+                                    min="1"
+                                    max="50"
+                                    value={deliveryRadius}
+                                    onChange={e => setDeliveryRadius(Number(e.target.value))}
+                                    className="w-full accent-indigo-600"
+                                />
+                                <span className="font-bold text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl min-w-[3.5rem] text-center">{deliveryRadius}m</span>
+                            </div>
                         </div>
                     </div>
 
@@ -234,7 +239,7 @@ export default function SettingsPage() {
                                     type="checkbox"
                                     checked={selfDelivery}
                                     onChange={e => setSelfDelivery(e.target.checked)}
-                                    className="w-5 h-5 accent-gray-900"
+                                    className="w-5 h-5 accent-gray-900 rounded"
                                 />
                                 <span className="font-bold text-gray-900">In-House Delivery</span>
                             </label>
@@ -243,7 +248,7 @@ export default function SettingsPage() {
                                     type="checkbox"
                                     checked={deliveryProviders.includes('doordash')}
                                     onChange={() => handleProviderChange('doordash')}
-                                    className="w-5 h-5 accent-[#ff3008]"
+                                    className="w-5 h-5 accent-[#ff3008] rounded"
                                 />
                                 <span className={`font-bold ${deliveryProviders.includes('doordash') ? 'text-[#ff3008]' : 'text-gray-900'}`}>DoorDash</span>
                             </label>
@@ -252,7 +257,7 @@ export default function SettingsPage() {
                                     type="checkbox"
                                     checked={deliveryProviders.includes('ubereats')}
                                     onChange={() => handleProviderChange('ubereats')}
-                                    className="w-5 h-5 accent-[#06c167]"
+                                    className="w-5 h-5 accent-[#06c167] rounded"
                                 />
                                 <span className={`font-bold ${deliveryProviders.includes('ubereats') ? 'text-[#06c167]' : 'text-gray-900'}`}>UberEats</span>
                             </label>
@@ -294,131 +299,17 @@ export default function SettingsPage() {
                             </div>
                             <p className="text-xs text-gray-400">The base color for your storefront theme.</p>
                         </div>
-                    </div>
-<<<<<<< HEAD
-=======
 
-                    {/* Delivery Settings */}
-                    <div style={{
-                        marginTop: '2rem',
-                        padding: '1.5rem',
-                        border: '1px solid #e3f2fd',
-                        borderRadius: '12px',
-                        backgroundColor: '#ffffff',
-                        boxShadow: '0 4px 6px rgba(0,0,0,0.02)'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid #f0f4f8', paddingBottom: '1rem' }}>
-                            <span style={{ fontSize: '1.5rem' }}>🚚</span>
-                            <h3 style={{ margin: 0, color: '#1a237e' }}>Delivery Settings</h3>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: '#333' }}>Delivery Radius (Miles)</label>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <input
-                                        type="range"
-                                        min="1"
-                                        max="50"
-                                        value={deliveryRadius}
-                                        onChange={e => setDeliveryRadius(Number(e.target.value))}
-                                        style={{ flex: 1, accentColor: '#222' }}
-                                    />
-                                    <span style={{
-                                        fontWeight: 'bold',
-                                        color: '#6366f1',
-                                        backgroundColor: '#eef2ff',
-                                        padding: '0.4rem 0.8rem',
-                                        borderRadius: '8px',
-                                        minWidth: '3.5rem',
-                                        textAlign: 'center'
-                                    }}>{deliveryRadius}m</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Theme Preview Card */}
-                        <div style={{ marginTop: '2.5rem' }}>
-                            <label style={{ display: 'block', marginBottom: '1rem', fontWeight: '500', color: '#333' }}>Marketplace Preview</label>
-                            <div style={{
-                                padding: '2rem',
-                                borderRadius: '16px',
-                                background: backgroundColor,
-                                border: '1px solid #eee',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                gap: '1rem',
-                                transition: 'all 0.3s ease'
-                            }}>
-                                <div style={{
-                                    padding: '1rem 2rem',
-                                    borderRadius: '50px',
-                                    background: primaryColor,
-                                    color: '#fff',
-                                    fontWeight: 'bold',
-                                    fontSize: '0.9rem',
-                                    boxShadow: `0 4px 14px ${primaryColor}44`
-                                }}>
+                        <div className="md:col-span-2 space-y-4 pt-4">
+                            <label className="block text-sm font-bold text-gray-700 uppercase tracking-wide">Marketplace Preview</label>
+                            <div className="p-8 rounded-2xl border border-gray-200 flex flex-col items-center gap-4 transition-all" style={{ backgroundColor }}>
+                                <div className="px-8 py-3 rounded-full text-white font-bold text-sm shadow-lg tracking-widest" style={{ backgroundColor: primaryColor, boxShadow: `0 4px 14px ${primaryColor}44` }}>
                                     Example Button
                                 </div>
-                                <p style={{ color: '#666', fontSize: '0.8rem' }}>This is how your brand will appear to customers.</p>
-                            </div>
-                        </div>
-
-                        <div style={{ marginTop: '1.5rem' }}>
-                            <label style={{ display: 'block', marginBottom: '1rem', fontWeight: '500', color: '#333' }}>Delivery Providers</label>
-                            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                                <label style={{
-                                    display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                    padding: '0.8rem 1.2rem', borderRadius: '8px',
-                                    border: selfDelivery ? '2px solid #222' : '1px solid #eee',
-                                    backgroundColor: selfDelivery ? '#f5f5f5' : '#fff',
-                                    cursor: 'pointer', transition: 'all 0.2s'
-                                }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={selfDelivery}
-                                        onChange={e => setSelfDelivery(e.target.checked)}
-                                        style={{ accentColor: '#222' }}
-                                    />
-                                    <span style={{ fontWeight: 500 }}>In-House Delivery</span>
-                                </label>
-                                <label style={{
-                                    display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                    padding: '0.8rem 1.2rem', borderRadius: '8px',
-                                    border: deliveryProviders.includes('doordash') ? '2px solid #ff3008' : '1px solid #eee',
-                                    backgroundColor: deliveryProviders.includes('doordash') ? '#fff5f5' : '#fff',
-                                    cursor: 'pointer', transition: 'all 0.2s'
-                                }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={deliveryProviders.includes('doordash')}
-                                        onChange={() => handleProviderChange('doordash')}
-                                        style={{ accentColor: '#ff3008' }}
-                                    />
-                                    <span style={{ fontWeight: 500, color: '#ff3008' }}>DoorDash</span>
-                                </label>
-                                <label style={{
-                                    display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                    padding: '0.8rem 1.2rem', borderRadius: '8px',
-                                    border: deliveryProviders.includes('ubereats') ? '2px solid #06c167' : '1px solid #eee',
-                                    backgroundColor: deliveryProviders.includes('ubereats') ? '#f0fff5' : '#fff',
-                                    cursor: 'pointer', transition: 'all 0.2s'
-                                }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={deliveryProviders.includes('ubereats')}
-                                        onChange={() => handleProviderChange('ubereats')}
-                                        style={{ accentColor: '#06c167' }}
-                                    />
-                                    <span style={{ fontWeight: 500, color: '#06c167' }}>UberEats</span>
-                                </label>
+                                <p className="text-gray-500 text-xs font-semibold">This is how your brand will appear to customers.</p>
                             </div>
                         </div>
                     </div>
-
->>>>>>> 41c0e56 (feat: implement fulfillment dashboard and unified checkout with inventory sync)
                 </div>
 
                 {/* Integrations Card */}
@@ -559,17 +450,19 @@ export default function SettingsPage() {
                                 <li className="flex items-center gap-2 text-sm text-indigo-700">✓ Facebook Direct</li>
                             </ul>
                             {subscriptionTier === 'free' && (
-                                <PayPalButtons
-                                    createSubscription={async (data: any, actions: any) => {
-                                        return actions.subscription.create({
-                                            'plan_id': 'P-YOUR_PRO_PLAN_ID'
-                                        });
-                                    }}
-                                    onApprove={async (data: any) => {
-                                        handleSubscriptionSuccess({ tier: 'pro' });
-                                    }}
-                                    style={{ layout: 'horizontal', label: 'subscribe', color: 'blue', shape: 'pill' }}
-                                />
+                                <div className="mt-4 opacity-50 pointer-events-none">
+                                    <PayPalButtons
+                                        createSubscription={async (data: any, actions: any) => {
+                                            return actions.subscription.create({
+                                                'plan_id': 'P-YOUR_PRO_PLAN_ID'
+                                            });
+                                        }}
+                                        onApprove={async (data: any) => {
+                                            handleSubscriptionSuccess({ tier: 'pro' });
+                                        }}
+                                        style={{ layout: 'horizontal', label: 'subscribe', color: 'blue', shape: 'pill' }}
+                                    />
+                                </div>
                             )}
                         </div>
 
@@ -589,17 +482,19 @@ export default function SettingsPage() {
                                 <li className="flex items-center gap-2 text-sm text-green-600 font-black">✓ FREE DELIVERY</li>
                             </ul>
                             {subscriptionTier !== 'elite' && (
-                                <PayPalButtons
-                                    createSubscription={async (data: any, actions: any) => {
-                                        return actions.subscription.create({
-                                            'plan_id': 'P-YOUR_ELITE_PLAN_ID'
-                                        });
-                                    }}
-                                    onApprove={async (data: any) => {
-                                        handleSubscriptionSuccess({ tier: 'elite' });
-                                    }}
-                                    style={{ layout: 'horizontal', label: 'subscribe', color: 'gold', shape: 'pill' }}
-                                />
+                                <div className="mt-4 opacity-50 pointer-events-none">
+                                    <PayPalButtons
+                                        createSubscription={async (data: any, actions: any) => {
+                                            return actions.subscription.create({
+                                                'plan_id': 'P-YOUR_ELITE_PLAN_ID'
+                                            });
+                                        }}
+                                        onApprove={async (data: any) => {
+                                            handleSubscriptionSuccess({ tier: 'elite' });
+                                        }}
+                                        style={{ layout: 'horizontal', label: 'subscribe', color: 'gold', shape: 'pill' }}
+                                    />
+                                </div>
                             )}
                         </div>
                     </div>

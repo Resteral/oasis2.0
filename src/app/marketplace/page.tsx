@@ -1,6 +1,5 @@
-<<<<<<< HEAD
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
 import GlobalSearch from '@/components/GlobalSearch';
 import CategoryNav from '@/components/CategoryNav';
@@ -62,7 +61,9 @@ export default function MarketplacePage() {
                         </p>
                     </div>
 
-                    <GlobalSearch />
+                    <Suspense fallback={<div className="h-16 w-full max-w-2xl mx-auto bg-white/5 animate-pulse rounded-full"></div>}>
+                        <GlobalSearch />
+                    </Suspense>
                 </div>
             </div>
 
@@ -70,7 +71,9 @@ export default function MarketplacePage() {
             <main className="max-w-7xl mx-auto px-8 -mt-24 pb-32 space-y-32">
                 {/* Category Navigation Bar */}
                 <section className="relative z-50">
-                    <CategoryNav onCategoryChange={setActiveCategory} />
+                    <Suspense fallback={<div className="h-16 w-full max-w-2xl mx-auto bg-white/5 animate-pulse rounded-full"></div>}>
+                        <CategoryNav onCategoryChange={setActiveCategory} />
+                    </Suspense>
                 </section>
 
                 {/* Discovery Stream */}
@@ -205,32 +208,6 @@ export default function MarketplacePage() {
                     <ul className="space-y-2 text-sm font-medium"><li>Instagram</li><li>Twitter</li><li>Our Journal</li></ul>
                 </div>
             </footer>
-=======
-import { createClient } from '@/lib/supabase/server';
-import MarketplaceClient from './MarketplaceClient';
-
-export const metadata = {
-    title: 'Marketplace | Oasis United',
-    description: 'Discover premium local businesses and products powered by AI.',
-};
-
-export default async function MarketplacePage() {
-    const supabase = await createClient();
-
-    // Fetch some "Featured" or "Trending" products for initial view
-    const { data: trendingProducts } = await supabase
-        .from('products')
-        .select(`
-            *,
-            business:businesses(name, slug, location)
-        `)
-        .limit(8)
-        .order('created_at', { ascending: false });
-
-    return (
-        <div className="min-h-screen bg-[#050510] text-white">
-            <MarketplaceClient initialProducts={trendingProducts || []} />
->>>>>>> 41c0e56 (feat: implement fulfillment dashboard and unified checkout with inventory sync)
         </div>
     );
 }

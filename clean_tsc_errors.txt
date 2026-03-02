@@ -1,0 +1,2 @@
+src/app/layout.tsx(9,24): error TS2304: Cannot find name 'Metadata'.
+src/components/PayPalProvider.tsx(12,31): error TS2741: Property 'clientId' is missing in type '{ "client-id": string; currency: string; intent: string; }' but required in type 'ReactPayPalScriptOptions'.

@@ -1,0 +1,18 @@
+[33m[1m⚠[22m[39m `eslint` configuration in next.config.ts is no longer supported. See more info here: https://nextjs.org/docs/app/api-reference/cli/next#next-lint-options
+[33m[1m⚠[22m[39m Invalid next.config.ts options detected: 
+[33m[1m⚠[22m[39m     Unrecognized key(s) in object: 'eslint'
+[33m[1m⚠[22m[39m See more info here: https://nextjs.org/docs/messages/invalid-next-config
+[33m[1m⚠[22m[39m Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\Sean\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\Sean\.gemini\antigravity\scratch\oasis_united\package-lock.json
+
+[1m[38;2;173;127;168m▲ Next.js 16.1.1[39m[22m (Turbopack)
+- Environments: .env.local
+
+
+> Build error occurred
+Error: Both middleware file "./src\src\middleware.ts" and proxy file "./src\src\proxy.ts" are detected. Please use "./src\src\proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+    at [3mignore-listed frames[23m
