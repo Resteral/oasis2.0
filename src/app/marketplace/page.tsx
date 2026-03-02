@@ -97,7 +97,7 @@ export default function MarketplacePage() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {featured.businesses.map((biz: any) => (
                                 <Link key={biz.id} href={`/shop/${biz.id}`} className="group relative bg-[#121215] rounded-[2.5rem] p-8 border border-white/5 hover:bg-white/10 transition-all overflow-hidden h-64 flex flex-col justify-end">
                                     <div className="absolute top-8 left-8 w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-xl font-black italic text-indigo-500 border border-white/5 group-hover:scale-110 transition-transform">
