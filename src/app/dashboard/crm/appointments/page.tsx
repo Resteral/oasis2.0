@@ -1,33 +1,55 @@
 'use client';
 
-import { useState } from 'react';
-
-// Mock type for development
-type Appointment = {
-    id: string;
-    customerName: string;
-    service: string;
-    time: string;
-    status: 'confirmed' | 'pending' | 'cancelled';
-};
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import { Appointment } from '@/lib/types';
+import { AutomationService } from '@/services/automation';
 
 export default function AppointmentsPage() {
-    const [appointments] = useState<Appointment[]>([
-        {
-            id: '1',
-            customerName: 'Alice Johnson',
-            service: 'Consultation',
-            time: '2023-10-27 10:00 AM',
-            status: 'confirmed',
-        },
-        {
-            id: '2',
-            customerName: 'Bob Smith',
-            service: 'Follow-up',
-            time: '2023-10-27 11:30 AM',
-            status: 'pending',
-        },
-    ]);
+    const [appointments, setAppointments] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        fetchAppointments();
+    }, []);
+
+    async function fetchAppointments() {
+        setIsLoading(true);
+        const { data, error } = await supabase
+            .from('appointments')
+            .select('*')
+            .order('start_time', { ascending: true });
+
+        if (error) {
+            console.error('Error fetching appointments:', error);
+        } else {
+            setAppointments(data || []);
+        }
+        setIsLoading(false);
+    }
+
+    async function updateStatus(id: string, status: string) {
+        const appointment = appointments.find(a => a.id === id);
+
+        const { error } = await supabase
+            .from('appointments')
+            .update({ status })
+            .eq('id', id);
+
+        if (error) {
+            alert('Failed to update status: ' + error.message);
+        } else {
+            // Trigger automation notification
+            if (appointment) {
+                await AutomationService.notifyAppointmentStatus(appointment, status);
+            }
+            fetchAppointments();
+        }
+    }
+
+    if (isLoading) {
+        return <div className="p-8 text-center">Loading appointments...</div>;
+    }
 
     return (
         <div className="p-8 max-w-7xl mx-auto">
@@ -63,42 +85,59 @@ export default function AppointmentsPage() {
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {appointments.map((apt) => (
+                        {appointments.length > 0 ? appointments.map((apt) => (
                             <tr key={apt.id} className="hover:bg-gray-50 transition-colors">
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex items-center">
                                         <div className="h-10 w-10 flex-shrink-0 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
-                                            {apt.customerName.charAt(0)}
+                                            {(apt.customer_name || 'G').charAt(0)}
                                         </div>
                                         <div className="ml-4">
-                                            <div className="text-sm font-medium text-gray-900">{apt.customerName}</div>
-                                            <div className="text-sm text-gray-500">{apt.id}</div>
+                                            <div className="text-sm font-medium text-gray-900">{apt.customer_name || 'Guest'}</div>
+                                            <div className="text-sm text-gray-500">{apt.customer_phone || apt.customer_email}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                    {apt.service}
+                                    {apt.service_name}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                    {apt.time}
+                                    {new Date(apt.start_time).toLocaleString()}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border 
-                    ${apt.status === 'confirmed' ? 'bg-green-50 text-green-700 border-green-200' :
-                                            apt.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                                        ${apt.status === 'confirmed' ? 'bg-green-50 text-green-700 border-green-200' :
+                                            apt.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+                                                apt.status === 'cancelled' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-gray-50 text-gray-700 border-gray-200'}`}>
                                         {apt.status.charAt(0).toUpperCase() + apt.status.slice(1)}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-md transition-colors mr-3">
-                                        Edit
-                                    </button>
-                                    <button className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-md transition-colors">
-                                        Cancel
-                                    </button>
+                                    {apt.status === 'pending' && (
+                                        <button
+                                            onClick={() => updateStatus(apt.id, 'confirmed')}
+                                            className="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-md transition-colors mr-3"
+                                        >
+                                            Confirm
+                                        </button>
+                                    )}
+                                    {apt.status !== 'cancelled' && (
+                                        <button
+                                            onClick={() => updateStatus(apt.id, 'cancelled')}
+                                            className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-md transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
-                        ))}
+                        )) : (
+                            <tr>
+                                <td colSpan={5} className="px-6 py-10 text-center text-gray-500">
+                                    No appointments found.
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>

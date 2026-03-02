@@ -1,25 +1,50 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/server';
+import { getEmbedding } from '@/lib/openai';
 
 /**
- * MOCK EMBEDDING FUNCTION
- * In a production environment, this would call OpenAI's text-embedding-3-small
- * or a similar service to convert text into a 1536-dimensional vector.
+ * Oasis Global Search V2 (AI-Powered)
+ * Handles semantic product search using OpenAI embeddings and pgvector.
  */
-async function generateEmbedding(text: string): Promise<number[]> {
-    // For demonstration, we'll generate a pseudo-random deterministic vector
-    // based on the input text. In a real app, use a proper embedding model.
-    const vector = new Array(1536).fill(0).map((_, i) => {
-        let hash = 0;
-        for (let j = 0; j < text.length; j++) {
-            hash = (hash << 5) - hash + text.charCodeAt(j);
-            hash |= 0;
+export async function POST(req: Request) {
+    try {
+        const { query, distance = 50, delivery = false } = await req.json();
+
+        if (!query) {
+            return NextResponse.json({ error: 'Query is required' }, { status: 400 });
         }
-        return Math.sin(hash + i) * 0.1;
-    });
-    return vector;
+
+        // 1. Generate embedding for the query
+        const queryEmbedding = await getEmbedding(query);
+
+        // 2. Call Supabase RPC match_products
+        const supabase = await createClient();
+        const { data: matches, error } = await supabase.rpc('match_products', {
+            query_embedding: queryEmbedding,
+            match_threshold: 0.1, // Adjust based on precision needs
+            match_count: 10,
+            max_distance: distance,
+            requires_delivery: delivery
+        });
+
+        if (error) {
+            console.error('Supabase RPC Error:', error);
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+
+        return NextResponse.json({
+            success: true,
+            results: matches || [],
+            query: query
+        });
+
+    } catch (error: any) {
+        console.error('Search V2 Error:', error);
+        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    }
 }
 
+// Keep GET for compatibility if needed, but return generic results
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('q');
@@ -28,37 +53,9 @@ export async function GET(req: Request) {
         return NextResponse.json({ success: false, error: 'Query missing' }, { status: 400 });
     }
 
-    try {
-        // 1. Generate Embedding for the search query
-        const queryEmbedding = await generateEmbedding(query);
-
-        // 2. Perform Vector Similarity Search via RPC
-        // Uses the match_products function defined in database_schema.md
-        const { data: products, error: productError } = await supabase.rpc('match_products', {
-            query_embedding: queryEmbedding,
-            match_threshold: 0.5,
-            match_count: 10
-        });
-
-        if (productError) throw productError;
-
-        // 3. Search for Businesses (Semantic logic)
-        // Note: For businesses, we'd ideally have a similar match_businesses RPC
-        const { data: businesses, error: businessError } = await supabase
-            .from('businesses')
-            .select('*')
-            .limit(5); // Fallback: keyword or random for now, until embedding logic matches
-
-        return NextResponse.json({
-            success: true,
-            query,
-            results: {
-                products: products || [],
-                shops: businesses || []
-            }
-        });
-    } catch (error: any) {
-        console.error('AI Search Error:', error);
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-    }
+    // Redirect or suggest using POST for semantic search
+    return NextResponse.json({
+        success: false,
+        message: "Oasis Search V2 requires a POST request for semantic analysis. Please use the 'Ask Oasis' interface."
+    }, { status: 405 });
 }

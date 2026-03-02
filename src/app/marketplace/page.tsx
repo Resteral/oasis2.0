@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 "use client";
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -204,6 +205,32 @@ export default function MarketplacePage() {
                     <ul className="space-y-2 text-sm font-medium"><li>Instagram</li><li>Twitter</li><li>Our Journal</li></ul>
                 </div>
             </footer>
+=======
+import { createClient } from '@/lib/supabase/server';
+import MarketplaceClient from './MarketplaceClient';
+
+export const metadata = {
+    title: 'Marketplace | Oasis United',
+    description: 'Discover premium local businesses and products powered by AI.',
+};
+
+export default async function MarketplacePage() {
+    const supabase = await createClient();
+
+    // Fetch some "Featured" or "Trending" products for initial view
+    const { data: trendingProducts } = await supabase
+        .from('products')
+        .select(`
+            *,
+            business:businesses(name, slug, location)
+        `)
+        .limit(8)
+        .order('created_at', { ascending: false });
+
+    return (
+        <div className="min-h-screen bg-[#050510] text-white">
+            <MarketplaceClient initialProducts={trendingProducts || []} />
+>>>>>>> 41c0e56 (feat: implement fulfillment dashboard and unified checkout with inventory sync)
         </div>
     );
 }

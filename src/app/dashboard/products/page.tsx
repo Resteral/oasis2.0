@@ -1,4 +1,5 @@
 "use client";
+<<<<<<< HEAD
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
@@ -15,12 +16,53 @@ export default function ProductsPage() {
     const [isAdding, setIsAdding] = useState(false);
     const [businessId, setBusinessId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+=======
+import { useEffect, useState, useRef } from 'react';
+import { supabase } from '@/lib/supabase';
+import { Product } from '@/lib/types';
+import { parseProductCSV, generateCSVTemplate } from '@/lib/import_utils';
+import styles from './page.module.css';
+
+const AI_PLACEHOLDERS = [
+    "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=100&q=80",
+    "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=100&q=80",
+    "https://images.unsplash.com/photo-1447933601403-0c60889eeaf6?auto=format&fit=crop&w=100&q=80",
+    "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=100&q=80"
+];
+
+export default function ProductsPage() {
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [businessId, setBusinessId] = useState<string | null>(null);
+    const [isAdding, setIsAdding] = useState(false);
+    const [isImporting, setIsImporting] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+>>>>>>> 41c0e56 (feat: implement fulfillment dashboard and unified checkout with inventory sync)
 
     const [newName, setNewName] = useState('');
     const [newPrice, setNewPrice] = useState('');
     const [newCategory, setNewCategory] = useState('General');
     const [newStock, setNewStock] = useState('100');
     const [newImage, setNewImage] = useState('');
+    const [newCategory, setNewCategory] = useState('General');
+
+    useEffect(() => {
+        fetchProducts();
+    }, []);
+
+    async function fetchProducts() {
+        setLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: business } = await supabase.from('businesses').select('id').eq('owner_id', user.id).single();
+        if (business) {
+            setBusinessId(business.id);
+            const { data } = await supabase.from('products').select('*').eq('business_id', business.id).order('created_at', { ascending: false });
+            setProducts(data || []);
+        }
+        setLoading(false);
+    }
 
     useEffect(() => {
         async function fetchProducts() {
@@ -57,6 +99,7 @@ export default function ProductsPage() {
     const handleAddProduct = async () => {
         if (!newName || !newPrice || !businessId) return;
 
+<<<<<<< HEAD
         const newProductData = {
             business_id: businessId,
             name: newName,
@@ -81,10 +124,29 @@ export default function ProductsPage() {
             setNewPrice('');
             setNewStock('100');
             setNewCategory('General');
+=======
+        const { data, error } = await supabase.from('products').insert([
+            {
+                name: newName,
+                price: parseFloat(newPrice),
+                image_url: newImage || AI_PLACEHOLDERS[0],
+                category: newCategory,
+                business_id: businessId,
+                stock: 100
+            }
+        ]).select();
+
+        if (!error && data) {
+            setProducts([data[0], ...products]);
+            setIsAdding(false);
+            setNewName('');
+            setNewPrice('');
+>>>>>>> 41c0e56 (feat: implement fulfillment dashboard and unified checkout with inventory sync)
             setNewImage('');
         }
     };
 
+<<<<<<< HEAD
     const handleDeleteProduct = async (id: string) => {
         if (!confirm("Are you sure you want to delete this product?")) return;
         const { error } = await supabase.from('products').delete().eq('id', id);
@@ -107,9 +169,95 @@ export default function ProductsPage() {
                 >
                     {isAdding ? 'CANCEL' : '+ ADD PRODUCT'}
                 </button>
+=======
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            const text = event.target?.result as string;
+            const result = parseProductCSV(text);
+
+            if (result.success && result.data && businessId) {
+                const toInsert = result.data.map(p => ({
+                    ...p,
+                    business_id: businessId,
+                    image_url: p.image_url || AI_PLACEHOLDERS[Math.floor(Math.random() * AI_PLACEHOLDERS.length)]
+                }));
+
+                const { error } = await supabase.from('products').insert(toInsert);
+                if (!error) {
+                    alert(`Successfully imported ${result.count} products!`);
+                    fetchProducts();
+                    setIsImporting(false);
+                } else {
+                    alert('Error saving products: ' + error.message);
+                }
+            } else {
+                alert(result.error);
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    const downloadTemplate = () => {
+        const csv = generateCSVTemplate();
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'oasis_product_template.csv';
+        a.click();
+    };
+
+    if (loading) return <div className="p-8 text-center text-gray-500">Loading your inventory...</div>;
+
+    return (
+        <div className="p-8 max-w-7xl mx-auto">
+            <div className={styles.header}>
+                <div>
+                    <h1 className={styles.title}>Inventory</h1>
+                    <p className={styles.subtitle}>Manage your products and bulk updates.</p>
+                </div>
+                <div className="flex gap-4">
+                    <button className="btn btn-secondary" onClick={() => setIsImporting(!isImporting)}>
+                        Bulk Import
+                    </button>
+                    <button className="btn btn-primary" onClick={() => setIsAdding(!isAdding)}>
+                        {isAdding ? 'Cancel' : '+ Add Product'}
+                    </button>
+                </div>
+>>>>>>> 41c0e56 (feat: implement fulfillment dashboard and unified checkout with inventory sync)
             </div>
 
+            {isImporting && (
+                <div className={styles.addProductForm}>
+                    <div className={styles['flex'] + ' ' + styles['justify-between'] + ' ' + styles['items-center'] + ' ' + styles['mb-4']}>
+                        <h3 className={styles['text-lg'] + ' ' + styles['font-bold']}>Bulk Import Products</h3>
+                        <button className={styles.templateBtn} onClick={downloadTemplate}>
+                            Download Template
+                        </button>
+                    </div>
+                    <p className={styles['text-sm'] + ' ' + styles['text-gray-500'] + ' ' + styles['mb-6']}>Upload a CSV file containing your product list. Required columns: Name, Price.</p>
+                    <input
+                        type="file"
+                        accept=".csv"
+                        className={styles.hidden}
+                        ref={fileInputRef}
+                        onChange={handleFileUpload}
+                    />
+                    <div
+                        className={styles.importArea}
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <span className={styles['text-gray-500'] + ' ' + styles['font-bold']}>Click to select Oasis CSV File</span>
+                    </div>
+                </div>
+            )}
+
             {isAdding && (
+<<<<<<< HEAD
                 <div className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100 space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
                     <div className="flex items-center gap-3 border-b border-gray-50 pb-6">
                         <span className="text-2xl">📦</span>
@@ -245,6 +393,83 @@ export default function ProductsPage() {
                                     <div className={`w-2 h-2 rounded-full ${product.stock > 10 ? 'bg-green-500' : 'bg-red-500 animate-pulse'}`}></div>
                                     <span className={`text-[10px] font-black tracking-widest ${product.stock > 10 ? 'text-gray-400' : 'text-red-500'}`}>
                                         {product.stock} IN STOCK
+=======
+                <div className={styles.addProductForm}>
+                    <h3 className={styles['text-lg'] + ' ' + styles['font-bold'] + ' ' + styles['mb-4']}>Create New Product</h3>
+                    <div className={styles.formRow}>
+                        <input
+                            className="input"
+                            placeholder="Product Name"
+                            value={newName}
+                            onChange={(e) => setNewName(e.target.value)}
+                        />
+                        <input
+                            className="input"
+                            type="number"
+                            placeholder="Price ($)"
+                            value={newPrice}
+                            onChange={(e) => setNewPrice(e.target.value)}
+                        />
+                        <input
+                            className="input"
+                            placeholder="Category"
+                            value={newCategory}
+                            onChange={(e) => setNewCategory(e.target.value)}
+                        />
+                    </div>
+
+                    <div className={styles.imageControl}>
+                        <input
+                            className="input"
+                            placeholder="Image URL (or generate one)"
+                            value={newImage}
+                            onChange={(e) => setNewImage(e.target.value)}
+                        />
+                        <button className="btn btn-secondary" onClick={handleGenerateAI}>
+                            ✨ AI Image
+                        </button>
+                    </div>
+                    {newImage && <img src={newImage} alt="Preview" className={styles.preview} />}
+
+                    <div className={styles['flex'] + ' ' + styles['justify-between'] + ' ' + styles['mt-6']}>
+                        <div></div>
+                        <button className="btn btn-primary px-8" onClick={handleAddProduct}>
+                            Save Product
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            <div className={styles.tableContainer}>
+                <table className={styles.table}>
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {products.length === 0 ? (
+                            <tr><td colSpan={6} className="text-center py-12 text-gray-400">No products found. Start by adding one or importing a list.</td></tr>
+                        ) : products.map((product) => (
+                            <tr key={product.id}>
+                                <td>
+                                    <div
+                                        className={styles.productThumb}
+                                        style={{ backgroundImage: `url(${product.image_url || AI_PLACEHOLDERS[0]})` }}
+                                    />
+                                </td>
+                                <td className={styles.nameCell}>{product.name}</td>
+                                <td><span className={styles.badge}>{product.category || 'General'}</span></td>
+                                <td className="font-bold">${Number(product.price).toFixed(2)}</td>
+                                <td>
+                                    <span className={(product.stock || 0) < 20 ? styles.lowStock : ''}>
+                                        {product.stock || 0} unit{(product.stock || 0) !== 1 ? 's' : ''}
+>>>>>>> 41c0e56 (feat: implement fulfillment dashboard and unified checkout with inventory sync)
                                     </span>
                                 </div>
                                 <button className="text-[10px] font-black text-indigo-500 uppercase tracking-widest hover:underline">

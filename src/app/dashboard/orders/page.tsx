@@ -1,16 +1,26 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { Order } from '@/lib/types';
+import { AutomationService } from '@/services/automation';
+import { trackEvent } from '@/services/analytics';
+import styles from './page.module.css';
 
-interface Order {
-    id: string;
-    customer_name: string;
-    customer_contact: string | null;
-    total: number;
-    status: string;
-    channel: string;
-    created_at: string;
-}
+const STATUS_LABELS: Record<Order['status'], string> = {
+    pending: 'Pending',
+    processing: 'Processing',
+    shipped: 'Shipped',
+    completed: 'Completed',
+    cancelled: 'Cancelled'
+};
+
+const CHANNEL_LABELS: Record<Order['channel'], string> = {
+    web: 'Online Store',
+    sms: 'SMS / Text',
+    instagram: 'Instagram',
+    facebook: 'Facebook',
+    whatsapp: 'WhatsApp'
+};
 
 const statusColors: Record<string, string> = {
     pending: 'bg-amber-50 text-amber-700 border-amber-100',
@@ -29,6 +39,7 @@ const channelColors: Record<string, string> = {
 export default function OrdersPage() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
+<<<<<<< HEAD
     const [dateRange, setDateRange] = useState({ start: '', end: '' });
 
     const fetchOrders = async () => {
@@ -59,9 +70,35 @@ export default function OrdersPage() {
     };
 
     useEffect(() => {
+=======
+    const [businessId, setBusinessId] = useState<string | null>(null);
+
+    useEffect(() => {
+        async function fetchOrders() {
+            setLoading(true);
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { data: business } = await supabase.from('businesses').select('id').eq('owner_id', user.id).single();
+            if (business) {
+                setBusinessId(business.id);
+                const { data, error } = await supabase
+                    .from('orders')
+                    .select('*')
+                    .eq('business_id', business.id)
+                    .order('created_at', { ascending: false });
+
+                if (!error && data) {
+                    setOrders(data as Order[]);
+                }
+            }
+            setLoading(false);
+        }
+>>>>>>> 41c0e56 (feat: implement fulfillment dashboard and unified checkout with inventory sync)
         fetchOrders();
     }, [dateRange]);
 
+<<<<<<< HEAD
     const handleExportCSV = () => {
         if (orders.length === 0) return;
 
@@ -219,6 +256,108 @@ export default function OrdersPage() {
                         View Reports
                     </button>
                 </div>
+=======
+    const handleStatusChange = async (orderId: string, newStatus: Order['status']) => {
+        const order = orders.find(o => o.id === orderId);
+        if (!order || !businessId) return;
+
+        // 1. Update DB
+        const { error } = await supabase
+            .from('orders')
+            .update({ status: newStatus })
+            .eq('id', orderId);
+
+        if (error) {
+            alert('Failed to update status: ' + error.message);
+            return;
+        }
+
+        // 2. Local State Update
+        setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+
+        // 3. Automation Notify (Phase 25)
+        await AutomationService.notifyOrderUpdate(order, newStatus);
+
+        // 4. Analytics Track (Phase 23/25)
+        if (newStatus === 'completed') {
+            await trackEvent(businessId, 'conversion', { amount: order.total, order_id: orderId });
+        }
+
+        alert(`Order status updated to ${newStatus}. Customer has been notified.`);
+    };
+
+    if (loading) return <div className={styles.container}><div className={styles.emptyState}>Loading the fulfillment dashboard...</div></div>;
+
+    return (
+        <div className={styles.container}>
+            <div className={styles.header}>
+                <div>
+                    <h1 className={styles.title}>Fulfillment Dashboard</h1>
+                    <p className={styles.subtitle}>Manage your order lifecycle and customer deliveries.</p>
+                </div>
+            </div>
+
+            <div className={styles.tableCard}>
+                <table className={styles.table}>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Customer</th>
+                            <th>Channel</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {orders.length === 0 ? (
+                            <tr>
+                                <td colSpan={6} className={styles.emptyState}>
+                                    No orders found. Once customers start ordering, they'll appear here.
+                                </td>
+                            </tr>
+                        ) : (
+                            orders.map(order => (
+                                <tr key={order.id}>
+                                    <td>
+                                        <div className="text-sm font-medium">{new Date(order.created_at).toLocaleDateString()}</div>
+                                        <div className="text-[10px] text-gray-400">{new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                    </td>
+                                    <td>
+                                        <div className={styles.customerName}>{order.customer_name || 'Anonymous Guest'}</div>
+                                        <div className={styles.customerContact}>{order.customer_contact || 'No contact provided'}</div>
+                                        {order.delivery_type === 'delivery' && order.address && (
+                                            <div className="text-[10px] text-indigo-400 mt-1 uppercase font-bold">📍 {order.address}</div>
+                                        )}
+                                    </td>
+                                    <td>
+                                        <span className={styles['channel-tag']}>
+                                            {CHANNEL_LABELS[order.channel] || order.channel?.toUpperCase()}
+                                        </span>
+                                    </td>
+                                    <td className={styles.amount}>${Number(order.total).toFixed(2)}</td>
+                                    <td>
+                                        <span className={`${styles.badge} ${styles['status-' + order.status]}`}>
+                                            {STATUS_LABELS[order.status]}
+                                        </span>
+                                    </td>
+                                    <td className={styles.actions}>
+                                        <select
+                                            className={styles.select}
+                                            value={order.status}
+                                            onChange={(e) => handleStatusChange(order.id, e.target.value as Order['status'])}
+                                        >
+                                            {Object.entries(STATUS_LABELS).map(([val, label]) => (
+                                                <option key={val} value={val}>{label}</option>
+                                            ))}
+                                        </select>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+>>>>>>> 41c0e56 (feat: implement fulfillment dashboard and unified checkout with inventory sync)
             </div>
         </div>
     );

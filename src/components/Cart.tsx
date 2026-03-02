@@ -5,40 +5,33 @@ import { PayPalButtons } from '@paypal/react-paypal-js';
 import styles from './Cart.module.css';
 import { AutomationService } from '@/services/automation';
 import { supabase } from '@/lib/supabase';
+import { trackEvent } from '@/services/analytics';
 
-interface CartProps {
-    businessId?: string;
+interface CartItem {
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
 }
 
-export default function Cart({ businessId }: CartProps) {
+interface CartProps {
+    businessId: string;
+    items: CartItem[];
+    setItems: (items: CartItem[]) => void;
+}
+
+export default function Cart({ businessId, items, setItems }: CartProps) {
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
-    const [items, setItems] = useState<any[]>([]);
-
-    // Simple listener for cart additions (for demo purposes)
-    // In a real app, use a Context or State Management
-    useEffect(() => {
-        const handleAddToCart = (e: any) => {
-            const product = e.detail;
-            setItems(prev => {
-                const existing = prev.find(item => item.id === product.id);
-                if (existing) {
-                    return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
-                }
-                return [...prev, { ...product, quantity: 1 }];
-            });
-            setIsOpen(true);
-        };
-        window.addEventListener('add-to-cart', handleAddToCart);
-        return () => window.removeEventListener('add-to-cart', handleAddToCart);
-    }, []);
 
     // Order State
     const [orderType, setOrderType] = useState<'pickup' | 'shipping'>('pickup');
     const [customerName, setCustomerName] = useState('');
+    const [customerContact, setCustomerContact] = useState('');
     const [address, setAddress] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [vendorTier, setVendorTier] = useState('free');
+    const [userPoints, setUserPoints] = useState(0);
 
     // Voucher State
     const [promoCode, setPromoCode] = useState('');
@@ -46,10 +39,10 @@ export default function Cart({ businessId }: CartProps) {
     const [voucherError, setVoucherError] = useState('');
 
     useEffect(() => {
-        async function fetchVendorTier() {
+        async function fetchData() {
             if (!businessId) return;
 
-            // 1. Get Owner ID from business
+            // 1. Get Vendor Tier
             const { data: business } = await supabase
                 .from('businesses')
                 .select('owner_id')
@@ -57,7 +50,6 @@ export default function Cart({ businessId }: CartProps) {
                 .single();
 
             if (business?.owner_id) {
-                // 2. Get Tier from profile
                 const { data: profile } = await supabase
                     .from('profiles')
                     .select('subscription_tier')
@@ -66,8 +58,20 @@ export default function Cart({ businessId }: CartProps) {
 
                 if (profile) setVendorTier(profile.subscription_tier || 'free');
             }
+
+            // 2. Get Loyalty Points
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: loyalty } = await supabase
+                    .from('loyalty_points')
+                    .select('points')
+                    .eq('user_id', user.id)
+                    .eq('business_id', businessId)
+                    .single();
+                if (loyalty) setUserPoints(Number(loyalty.points));
+            }
         }
-        fetchVendorTier();
+        fetchData();
     }, [businessId]);
 
     const handleApplyVoucher = async () => {
@@ -88,7 +92,6 @@ export default function Cart({ businessId }: CartProps) {
             return;
         }
 
-        // Check spend limit
         const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
         if (subtotal < Number(voucher.min_spend)) {
             setVoucherError(`Minimum spend of $${voucher.min_spend} required`);
@@ -96,7 +99,6 @@ export default function Cart({ businessId }: CartProps) {
             return;
         }
 
-        // Apply discount
         if (voucher.discount_type === 'percentage') {
             setDiscount((subtotal * Number(voucher.discount_value)) / 100);
         } else {
@@ -108,24 +110,63 @@ export default function Cart({ businessId }: CartProps) {
     const shippingCost = orderType === 'shipping' ? (vendorTier === 'free' ? 10.00 : 0) : 0;
     const total = Math.max(0, subtotal + shippingCost - discount);
 
-    const [userPoints, setUserPoints] = useState(0);
+    const handleCheckout = async () => {
+        if (!customerName || !customerContact) {
+            alert("Please enter your name and contact info (Email/Phone)");
+            return;
+        }
+        if (orderType === 'shipping' && !address) {
+            alert("Please enter your shipping address");
+            return;
+        }
 
-    useEffect(() => {
-        const fetchPoints = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user || !businessId) return;
+        setIsProcessing(true);
 
-            const { data } = await supabase
-                .from('loyalty_points')
-                .select('points')
-                .eq('user_id', user.id)
-                .eq('business_id', businessId)
-                .single();
+        try {
+            // 1. Create the Order via API (handles stock and loyalty)
+            const res = await fetch('/api/orders/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    businessId,
+                    customerName,
+                    customerContact,
+                    items,
+                    total,
+                    type: orderType,
+                    address: orderType === 'shipping' ? address : undefined
+                }),
+            });
 
-            if (data) setUserPoints(Number(data.points));
-        };
-        fetchPoints();
-    }, [businessId]);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Checkout failed');
+
+            // 2. Automation Notify
+            await AutomationService.processOrder({
+                id: data.order.id,
+                customerName,
+                items,
+                total,
+                type: orderType,
+                phone: customerContact.includes('+') ? customerContact : undefined
+            });
+
+            // 3. Track Analytics
+            await trackEvent(businessId, 'purchase', { total, items_count: items.length });
+
+            alert("Order placed successfully! We'll notify you as soon as it's ready.");
+            setItems([]);
+            setIsOpen(false);
+            setCustomerName('');
+            setCustomerContact('');
+            setAddress('');
+        } catch (err: any) {
+            console.error("Checkout failed:", err);
+            alert("Checkout failed: " + err.message);
+        } finally {
+            setIsProcessing(false);
+        }
+    };
 
     const handleOrderCapture = async (paypalOrderId: string, dbOrderId: string) => {
         try {
@@ -136,27 +177,8 @@ export default function Cart({ businessId }: CartProps) {
             });
             const data = await response.json();
             if (data.status === 'COMPLETED') {
-                // Award Loyalty Points
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user && businessId) {
-                    const pointsToAward = Math.floor(total);
-                    const { data: current } = await supabase
-                        .from('loyalty_points')
-                        .select('points')
-                        .eq('user_id', user.id)
-                        .eq('business_id', businessId)
-                        .single();
-
-                    const newPoints = (current?.points || 0) + pointsToAward;
-                    await supabase
-                        .from('loyalty_points')
-                        .upsert({
-                            user_id: user.id,
-                            business_id: businessId,
-                            points: newPoints,
-                            last_updated: new Date().toISOString()
-                        });
-                }
+                // Track Analytics
+                await trackEvent(businessId, 'purchase', { total, method: 'paypal' });
 
                 setItems([]);
                 setIsOpen(false);
@@ -193,16 +215,19 @@ export default function Cart({ businessId }: CartProps) {
 
                         <div className={styles.items}>
                             {items.length === 0 ? (
-                                <p className={styles.empty}>Your cart is empty.</p>
+                                <div className={styles.emptyState}>
+                                    <p className={styles.empty}>Your cart is empty.</p>
+                                    <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={() => setIsOpen(false)}>Continue Shopping</button>
+                                </div>
                             ) : (
                                 items.map((item) => (
                                     <div key={item.id} className={styles.item}>
                                         <div className={styles.itemInfo}>
                                             <p className={styles.itemName}>{item.name}</p>
-                                            <p className={styles.itemPrice}>${item.price.toFixed(2)} x {item.quantity}</p>
+                                            <p className={styles.itemPrice}>${Number(item.price).toFixed(2)} x {item.quantity}</p>
                                         </div>
                                         <div className={styles.itemTotal}>
-                                            ${(item.price * item.quantity).toFixed(2)}
+                                            ${(Number(item.price) * item.quantity).toFixed(2)}
                                         </div>
                                     </div>
                                 ))
@@ -211,7 +236,6 @@ export default function Cart({ businessId }: CartProps) {
 
                         {items.length > 0 && (
                             <div className={styles.footer}>
-                                {/* Order Type Toggle */}
                                 <div className={styles.toggleGroup}>
                                     <button
                                         className={`${styles.toggleBtn} ${orderType === 'pickup' ? styles.active : ''}`}
@@ -227,14 +251,21 @@ export default function Cart({ businessId }: CartProps) {
                                     </button>
                                 </div>
 
-                                {/* Customer Details */}
                                 <div className={styles.form}>
                                     <input
                                         type="text"
-                                        placeholder="Your Name *"
+                                        placeholder="Full Name *"
                                         className="input"
                                         value={customerName}
                                         onChange={(e) => setCustomerName(e.target.value)}
+                                        style={{ marginBottom: '0.5rem' }}
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Email or Phone *"
+                                        className="input"
+                                        value={customerContact}
+                                        onChange={(e) => setCustomerContact(e.target.value)}
                                         style={{ marginBottom: '0.5rem' }}
                                     />
                                     {orderType === 'shipping' && (
@@ -248,7 +279,6 @@ export default function Cart({ businessId }: CartProps) {
                                     )}
                                 </div>
 
-                                {/* Promo Code */}
                                 <div className="mt-4 border-t border-gray-100 pt-4">
                                     <div className="flex gap-2">
                                         <input
@@ -297,13 +327,13 @@ export default function Cart({ businessId }: CartProps) {
                                             <PayPalButtons
                                                 style={{ layout: "vertical" }}
                                                 createOrder={async () => {
-                                                    // 1. Create Order in our DB first
                                                     const res = await fetch('/api/orders/create', {
                                                         method: 'POST',
                                                         headers: { 'Content-Type': 'application/json' },
                                                         body: JSON.stringify({
                                                             businessId,
                                                             customerName,
+                                                            customerContact,
                                                             items,
                                                             total,
                                                             type: orderType,
@@ -311,18 +341,13 @@ export default function Cart({ businessId }: CartProps) {
                                                         }),
                                                     });
                                                     const { order } = await res.json();
-
-                                                    // 2. Create PayPal Order
                                                     const ppRes = await fetch('/api/paypal/create-order', {
                                                         method: 'POST',
                                                         headers: { 'Content-Type': 'application/json' },
                                                         body: JSON.stringify({ total, orderId: order.id }),
                                                     });
                                                     const ppOrder = await ppRes.json();
-
-                                                    // Store the DB order ID in window for capture phase
                                                     (window as any).currentDbOrderId = order.id;
-
                                                     return ppOrder.id;
                                                 }}
                                                 onApprove={async (data: any) => {
@@ -331,11 +356,16 @@ export default function Cart({ businessId }: CartProps) {
                                             />
                                         </div>
                                     ) : (
-                                        <p className="text-sm text-center text-muted-foreground" style={{ marginBottom: '1rem' }}>
-                                            Complete your details to pay with PayPal
-                                        </p>
+                                        <button
+                                            className="btn btn-primary"
+                                            style={{ width: '100%', marginBottom: '0.5rem' }}
+                                            onClick={handleCheckout}
+                                            disabled={isProcessing}
+                                        >
+                                            {isProcessing ? 'Processing...' : 'Place Order'}
+                                        </button>
                                     )}
-                                    <button className="btn btn-outline" style={{ width: '100%' }}>Message Business</button>
+                                    <button className="btn btn-outline" style={{ width: '100%' }} onClick={() => setIsOpen(false)}>Keep Shopping</button>
                                 </div>
                             </div>
                         )}

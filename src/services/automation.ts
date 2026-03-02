@@ -48,6 +48,51 @@ export const AutomationService = {
         return true;
     },
 
+    // 1b. Hook for appointment notifications
+    notifyAppointmentStatus: async (appointment: any, status: string) => {
+        console.log(`[Automation] Notifying appointment ${appointment.id} status change to ${status}...`);
+
+        const message = status === 'confirmed'
+            ? `Your appointment for ${appointment.service_name} at ${new Date(appointment.start_time).toLocaleString()} has been CONFIRMED. See you then!`
+            : `Your appointment for ${appointment.service_name} has been CANCELLED. Please contact us if you have questions.`;
+
+        // SMS Notification
+        if (appointment.customer_phone) {
+            await AutomationService.sendSMS(appointment.customer_phone, message);
+        }
+
+        // Email Notification
+        if (appointment.customer_email) {
+            await AutomationService.sendEmail(appointment.customer_email, `Appointment ${status.toUpperCase()}`, message);
+        }
+
+        return true;
+    },
+
+    // 1c. Hook for order status notifications
+    notifyOrderUpdate: async (order: any, status: string) => {
+        console.log(`[Automation] Notifying order ${order.id} status change to ${status}...`);
+
+        const messages: Record<string, string> = {
+            'processing': `Preparing order #${order.id.slice(0, 5)}.`,
+            'shipped': `Order #${order.id.slice(0, 5)} on the way! 🚚`,
+            'completed': `Order #${order.id.slice(0, 5)} delivered. ✨`,
+            'cancelled': `Order #${order.id.slice(0, 5)} cancelled.`
+        };
+
+        const body = messages[status] || `Order #${order.id.slice(0, 5)} status: ${status}.`;
+
+        if (order.customer_contact?.includes('+')) {
+            await AutomationService.sendSMS(order.customer_contact, body);
+        }
+
+        if (order.customer_contact?.includes('@')) {
+            await AutomationService.sendEmail(order.customer_contact, `Order #${order.id.slice(0, 5)} Update`, body);
+        }
+
+        return true;
+    },
+
     // 2. Mock Twilio/WhatsApp Webhook (Incoming)
     getMessages: async (): Promise<Message[]> => {
         // Simulate fetching latest messages from Twilio/Meta API

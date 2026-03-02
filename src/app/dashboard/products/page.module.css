@@ -131,3 +131,47 @@
 .actionBtn:hover {
     text-decoration: underline;
 }
+
+.importArea {
+    border: 2px dashed hsl(var(--border));
+    border-radius: var(--radius);
+    padding: 3rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: hsla(var(--background), 0.5);
+    margin-top: 1rem;
+}
+
+.importArea:hover {
+    border-color: hsl(var(--primary));
+    background-color: hsla(var(--primary), 0.05);
+}
+
+.templateBtn {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: hsl(var(--secondary));
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.templateBtn:hover {
+    text-decoration: underline;
+}
+
+.flex { display: flex; }
+.justify-between { justify-content: space-between; }
+.items-center { align-items: center; }
+.gap-4 { gap: 1rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.mt-6 { margin-top: 1.5rem; }
+.hidden { display: none; }
+.whitespace-nowrap { white-space: nowrap; }
+.px-8 { padding-left: 2rem; padding-right: 2rem; }
+.text-lg { font-size: 1.125rem; }
+.font-bold { font-weight: 700; }
+.text-gray-500 { color: hsl(var(--muted-foreground)); }
+.text-sm { font-size: 0.875rem; }

@@ -9,13 +9,15 @@ export default function AiDiscoveryModal() {
     const [query, setQuery] = useState('');
     const [distance, setDistance] = useState(5);
     const [delivery, setDelivery] = useState(false);
-    const [isSearching, setIsSearching] = useState(false);
     const [results, setResults] = useState<any[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
     const [aiInsight, setAiInsight] = useState('');
 
     const handleOpen = () => {
         setIsOpen(true);
         setStep(1);
+        setResults([]);
+        setAiInsight('');
     };
 
     const handleClose = () => setIsOpen(false);
@@ -31,20 +33,26 @@ export default function AiDiscoveryModal() {
     const handleSearch = async () => {
         setIsSearching(true);
         try {
-            const res = await fetch('/api/ai/discover', {
+            const response = await fetch('/api/search/v2', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query, distance, delivery })
             });
-            const data = await res.json();
-            if (data.success) {
-                setResults(data.matches || []);
-                setAiInsight(data.ai_insight || `We found ${data.matches?.length || 0} matches for "${query}"`);
+
+            const data = await response.json();
+            if (data.success || data.results) {
+                const matches = data.results || data.matches || [];
+                setResults(matches);
+                setAiInsight(data.ai_insight || `We found ${matches.length} perfect matches for "${query}"`);
+                setStep(3);
+            } else {
+                console.error('Search failed:', data.error);
+                alert('Search failed: ' + (data.error || 'Unknown error'));
             }
-        } catch (err) {
-            console.error(err);
+        } catch (error) {
+            console.error('Search error:', error);
+            alert('An error occurred during search.');
         } finally {
-            setStep(3);
             setIsSearching(false);
         }
     };
@@ -176,29 +184,44 @@ export default function AiDiscoveryModal() {
                             </div>
 
                             <div className="space-y-4 max-h-[350px] overflow-y-auto px-2 scrollbar-hide">
-                                {results.length > 0 ? results.map((business, index) => (
+                                {results.length > 0 ? results.map((result, index) => (
                                     <div
-                                        key={business.id || index}
+                                        key={result.id || index}
                                         onClick={() => {
                                             handleClose();
-                                            router.push(`/shop/${business.slug || business.id}`);
+                                            router.push(`/shop/${result.business_slug || result.business_id || result.slug || result.id}`);
                                         }}
                                         className="p-6 bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group"
                                     >
                                         <div className="flex justify-between items-start mb-2">
-                                            <h4 className="font-black text-lg text-gray-900 group-hover:text-indigo-600 transition-colors uppercase italic">{business.name}</h4>
-                                            <span className="text-indigo-600 text-xl">→</span>
+                                            <div>
+                                                <h4 className="font-black text-lg text-gray-900 group-hover:text-indigo-600 transition-colors uppercase italic">{result.name}</h4>
+                                                {result.business_name && (
+                                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">at {result.business_name}</span>
+                                                )}
+                                            </div>
+                                            <div className="text-right">
+                                                {result.price && <span className="font-black text-indigo-600">${result.price}</span>}
+                                                <span className="text-indigo-600 text-xl block">→</span>
+                                            </div>
                                         </div>
                                         <p className="text-xs text-gray-400 font-medium line-clamp-2 italic leading-relaxed">
-                                            {business.description || "Premium local merchant partner."}
+                                            {result.description || "Premium local merchant partner."}
                                         </p>
                                         <div className="mt-4 flex gap-2">
-                                            <span className="text-[9px] font-black bg-gray-50 text-gray-400 px-2 py-1 rounded-lg uppercase tracking-widest">{business.location || 'Local'}</span>
+                                            <span className="text-[9px] font-black bg-gray-50 text-gray-400 px-2 py-1 rounded-lg uppercase tracking-widest">
+                                                📍 {result.business_location || result.location || 'Local'}
+                                            </span>
+                                            {result.similarity && (
+                                                <span className="text-[9px] font-black bg-indigo-50 text-indigo-400 px-2 py-1 rounded-lg uppercase tracking-widest">
+                                                    ✨ {Math.round(result.similarity * 100)}% match
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                 )) : (
                                     <div className="py-12 text-center text-gray-400 font-medium bg-gray-50 rounded-3xl">
-                                        No exact matches found in your area.
+                                        No direct matches found. Try broadening your search!
                                     </div>
                                 )}
                             </div>
@@ -207,7 +230,7 @@ export default function AiDiscoveryModal() {
                                 onClick={handleClose}
                                 className="w-full py-5 bg-gray-100 text-gray-900 rounded-[2rem] font-black text-[10px] tracking-widest uppercase hover:bg-gray-200 transition-all"
                             >
-                                New Discovery Search
+                                Close Discovery
                             </button>
                         </div>
                     )}

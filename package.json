@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "index": "tsx scripts/index_products.ts"
   },
   "dependencies": {
     "@paypal/react-paypal-js": "^8.7.0",
@@ -19,7 +20,8 @@
     "react-dom": "19.2.3",
     "recharts": "^3.6.0",
     "stripe": "^20.1.0",
-    "twilio": "^5.11.1"
+    "twilio": "^5.11.1",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -27,6 +29,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "tsx": "^4.19.2"
   }
 }
