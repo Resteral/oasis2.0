@@ -1,117 +1,102 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import styles from './page.module.css';
+import ChatInterface from '@/components/ChatInterface';
 
-export default function InboxPage() {
-    const [messages, setMessages] = useState<any[]>([]);
+export default function MerchantMessagesPage() {
+    const [conversations, setConversations] = useState<any[]>([]);
+    const [selectedConv, setSelectedConv] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [business, setBusiness] = useState<any>(null);
 
     useEffect(() => {
-        const fetchMessages = async () => {
+        const loadMerchantInbox = async () => {
+            setLoading(true);
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
-            // 1. Get Business ID
-            const { data: business } = await supabase
+            // 1. Fetch which business this user manages
+            const { data: bus } = await supabase
                 .from('businesses')
-                .select('id')
+                .select('*')
                 .eq('owner_id', user.id)
                 .single();
 
-            if (business) {
-                // 2. Fetch Messages
-                const { data: msgs } = await supabase
-                    .from('messages')
-                    .select('*')
-                    .eq('business_id', business.id)
-                    .order('created_at', { ascending: false });
+            if (bus) {
+                setBusiness(bus);
+                // 2. Fetch conversations for this business
+                const { data: convs } = await supabase
+                    .from('conversations')
+                    .select('*, profiles:customer_id(full_name, email)')
+                    .eq('business_id', bus.id)
+                    .order('updated_at', { ascending: false });
 
-                if (msgs) {
-                    setMessages(msgs.map(m => ({
-                        id: m.id,
-                        platform: m.channel,
-                        sender: m.customer_contact,
-                        content: m.content,
-                        timestamp: new Date(m.created_at),
-                        read: true // Schema doesn't have read status yet
-                    })));
-                }
+                if (convs) setConversations(convs);
             }
             setLoading(false);
         };
-
-        fetchMessages();
-        // Polling every 5s
-        const interval = setInterval(fetchMessages, 5000);
-        return () => clearInterval(interval);
+        loadMerchantInbox();
     }, []);
 
-    const handleSimulate = async (channel: string) => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-        const { data: business } = await supabase.from('businesses').select('id').eq('owner_id', user.id).single();
-
-        if (business) {
-            await supabase.from('messages').insert({
-                business_id: business.id,
-                customer_contact: channel === 'instagram' || channel === 'facebook' ? '@demo_user' : '+15550000',
-                channel: channel,
-                direction: 'inbound',
-                content: `This is a simulated message from ${channel}.`
-            });
-            // Re-fetch will happen on next poll or we could force it
-        }
-    };
-
-    if (loading) return <div className="p-8">Loading messages...</div>;
+    if (loading) return (
+        <div className="p-12 flex justify-center">
+            <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+    );
 
     return (
-        <div className={styles.container}>
-            <div className={styles.header}>
-                <div>
-                    <h1 className={styles.title}>Unified Inbox</h1>
-                    <p className={styles.subtitle}>
-                        Manage all your customer conversations in one place.
-                    </p>
+        <div className="p-8 md:p-12 space-y-12">
+            <header className="space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-full">
+                    <span className="text-[10px] font-black uppercase tracking-widest">Merchant Support Hub</span>
                 </div>
-                <div className={styles.simulationControls}>
-                    <span className={styles.label}>Simulate Incoming:</span>
-                    <button onClick={() => handleSimulate('sms')} className={styles.simBtn}>+ SMS</button>
-                    <button onClick={() => handleSimulate('whatsapp')} className={styles.simBtn}>+ WhatsApp</button>
-                    <button onClick={() => handleSimulate('instagram')} className={styles.simBtn}>+ Insta</button>
-                    <button onClick={() => handleSimulate('facebook')} className={styles.simBtn}>+ FB</button>
-                </div>
-            </div>
+                <h1 className="text-5xl font-black italic tracking-tighter text-gray-900 leading-tight">Customer <span className="text-indigo-600">Messages.</span></h1>
+                <p className="text-gray-400 font-medium max-w-md italic">Direct engagement with your shoppers. Close more sales through premium customer care.</p>
+            </header>
 
-            <div className={styles.inbox}>
-                {messages.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500">No messages yet.</div>
-                ) : messages.map((msg) => (
-                    <div key={msg.id} className={`${styles.messageCard}`}>
-                        <div className={styles.msgIcon}>
-                            {msg.platform === 'sms' && '💬'}
-                            {msg.platform === 'whatsapp' && '📱'}
-                            {msg.platform === 'instagram' && '📸'}
-                            {msg.platform === 'facebook' && '📘'}
-                        </div>
-                        <div className={styles.msgContent}>
-                            <div className={styles.msgHeader}>
-                                <span className={styles.sender}>{msg.sender}</span>
-                                <span className={styles.time}>{msg.timestamp.toLocaleTimeString()}</span>
-                            </div>
-                            <p className={styles.text}>{msg.content}</p>
-                            <div className={styles.platformTag} data-platform={msg.platform}>
-                                Via {msg.platform}
-                            </div>
-                        </div>
-                        <div className={styles.actions}>
-                            <button className="btn btn-primary btn-sm">Reply</button>
+            <main className="grid grid-cols-1 gap-4">
+                {conversations.length === 0 ? (
+                    <div className="py-24 flex flex-col items-center justify-center gap-6 bg-gray-50 rounded-[3rem] border border-gray-100 text-center">
+                        <span className="text-5xl grayscale opacity-20 bg-white p-6 rounded-full shadow-sm">📬</span>
+                        <div className="space-y-2">
+                            <p className="font-bold text-xl text-gray-900 italic">No messages yet.</p>
+                            <p className="text-sm text-gray-400">Customer inquiries will appear here as soon as they reach out.</p>
                         </div>
                     </div>
-                ))}
-            </div>
+                ) : (
+                    conversations.map((conv) => (
+                        <button
+                            key={conv.id}
+                            onClick={() => setSelectedConv(conv)}
+                            className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl hover:border-indigo-100 transition-all flex items-center gap-6 group text-left w-full"
+                        >
+                            <div className="w-16 h-16 bg-gray-50 rounded-[1.5rem] flex items-center justify-center text-2xl font-black italic text-indigo-600 border border-gray-100 group-hover:scale-110 group-hover:bg-indigo-50 transition-all">
+                                {conv.profiles?.full_name?.[0] || 'U'}
+                            </div>
+                            <div className="flex-1 space-y-1">
+                                <div className="flex justify-between items-center">
+                                    <h3 className="font-black text-lg text-gray-900 group-hover:text-indigo-600 transition-colors uppercase tracking-tight">{conv.profiles?.full_name || 'Anonymous User'}</h3>
+                                    <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">{new Date(conv.updated_at).toLocaleDateString()}</span>
+                                </div>
+                                <p className="text-gray-400 text-sm font-medium line-clamp-1 italic">"{conv.last_message || 'New customer inquiry...'}"</p>
+                            </div>
+                            <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-300 group-hover:text-indigo-600 group-hover:bg-indigo-50 transition-all">
+                                →
+                            </div>
+                        </button>
+                    ))
+                )}
+            </main>
 
+            {selectedConv && (
+                <ChatInterface
+                    customerId={selectedConv.customer_id}
+                    businessId={business.id}
+                    senderId={business.owner_id} // Merchant sends as boutique owner profile
+                    businessName={business.name}
+                    onClose={() => setSelectedConv(null)}
+                />
+            )}
         </div>
     );
 }

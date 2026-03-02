@@ -1,5 +1,29 @@
+import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import ShopClient from './ShopClient';
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+    const supabase = await createClient();
+    const { id } = params;
+
+    let { data: business } = await supabase
+        .from('businesses')
+        .select('name, description, image_url, slug')
+        .or(`slug.eq.${id},id.eq.${id}`)
+        .single();
+
+    if (!business) return { title: 'Oasis Store' };
+
+    return {
+        title: `${business.name} | Oasis United`,
+        description: business.description || `Shop local at ${business.name} on Oasis.`,
+        openGraph: {
+            title: business.name,
+            description: business.description || `Shop local at ${business.name} on Oasis.`,
+            images: [business.image_url || '/og-image.png'],
+        },
+    };
+}
 
 export default async function ShopPage({ params }: { params: { id: string } }) {
     const supabase = await createClient();

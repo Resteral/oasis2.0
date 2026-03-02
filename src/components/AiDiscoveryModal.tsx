@@ -53,190 +53,165 @@ export default function AiDiscoveryModal() {
         return (
             <button
                 onClick={handleOpen}
-                style={{
-                    position: 'fixed',
-                    bottom: '2rem',
-                    right: '2rem',
-                    backgroundColor: '#000',
-                    color: '#fff',
-                    padding: '1rem 2rem',
-                    borderRadius: '50px',
-                    border: 'none',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                    cursor: 'pointer',
-                    zIndex: 1000,
-                    fontWeight: 'bold',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                }}
+                className="fixed bottom-8 right-8 z-[100] bg-gray-900 text-white p-6 rounded-[2.5rem] shadow-2xl flex items-center gap-4 hover:scale-105 active:scale-95 transition-all group border border-white/10"
             >
-                ✨ Ask AI
+                <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-xl shadow-lg shadow-indigo-500/30 group-hover:rotate-12 transition-transform">
+                    ✨
+                </div>
+                <div className="text-left">
+                    <div className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">Oasis AI</div>
+                    <div className="text-sm font-black uppercase tracking-widest">Ask Discovery</div>
+                </div>
             </button>
         );
     }
 
     return (
-        <div style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1001,
-            backdropFilter: 'blur(2px)'
-        }}>
-            <div style={{
-                backgroundColor: '#fff',
-                width: '90%',
-                maxWidth: '500px',
-                borderRadius: '16px',
-                padding: '2rem',
-                position: 'relative',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
-            }}>
+        <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+            <div className="bg-white/95 backdrop-blur-xl w-full max-w-lg rounded-[3.5rem] shadow-2xl relative overflow-hidden border border-white/20 animate-in zoom-in-95 duration-300">
+                {/* Close Button */}
                 <button
                     onClick={handleClose}
-                    style={{
-                        position: 'absolute',
-                        top: '1rem',
-                        right: '1rem',
-                        background: 'none',
-                        border: 'none',
-                        fontSize: '1.5rem',
-                        cursor: 'pointer',
-                        color: '#999'
-                    }}
+                    className="absolute top-8 right-8 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-colors z-10"
                 >
-                    &times;
+                    ✕
                 </button>
 
-                {step === 1 && (
-                    <div>
-                        <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>What are you looking for?</h2>
-                        <input
-                            autoFocus
-                            value={query}
-                            onChange={e => setQuery(e.target.value)}
-                            placeholder="e.g. Sushi, Gym, Coffee..."
-                            style={{
-                                width: '100%',
-                                padding: '1rem',
-                                fontSize: '1.2rem',
-                                borderRadius: '8px',
-                                border: '1px solid #ddd',
-                                marginBottom: '1.5rem'
-                            }}
-                            onKeyDown={e => e.key === 'Enter' && handleNext()}
-                        />
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                            {['Espresso', 'Yoga', 'Tacos', 'Haircut', 'Gifts'].map(tag => (
-                                <button
-                                    key={tag}
-                                    onClick={() => setQuery(tag)}
-                                    style={{
-                                        padding: '0.5rem 1rem',
-                                        borderRadius: '20px',
-                                        border: '1px solid #eee',
-                                        backgroundColor: query === tag ? '#000' : '#f9f9f9',
-                                        color: query === tag ? '#fff' : '#000',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    {tag}
-                                </button>
-                            ))}
-                        </div>
-                        <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
+                <div className="p-12">
+                    {step === 1 && (
+                        <div className="space-y-8">
+                            <div className="space-y-2">
+                                <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em]">Step 01 / Intent</span>
+                                <h2 className="text-4xl font-black text-gray-900 tracking-tight">What are you looking for?</h2>
+                            </div>
+                            <input
+                                autoFocus
+                                value={query}
+                                onChange={e => setQuery(e.target.value)}
+                                placeholder="Street food, local shops, yoga..."
+                                className="w-full bg-gray-50/50 border-2 border-transparent focus:border-indigo-100 focus:bg-white p-6 rounded-3xl text-xl font-medium outline-none transition-all placeholder:text-gray-300"
+                                onKeyDown={e => e.key === 'Enter' && handleNext()}
+                            />
+                            <div className="flex flex-wrap gap-2">
+                                {['Espresso', 'Yoga', 'Tacos', 'Haircut', 'Gifts'].map(tag => (
+                                    <button
+                                        key={tag}
+                                        onClick={() => setQuery(tag)}
+                                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${query === tag
+                                            ? 'bg-gray-900 text-white shadow-lg'
+                                            : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                                            }`}
+                                    >
+                                        {tag}
+                                    </button>
+                                ))}
+                            </div>
                             <button
                                 onClick={handleNext}
                                 disabled={!query}
-                                className="btn btn-primary"
-                                style={{ padding: '0.8rem 2rem', backgroundColor: '#000', color: '#fff', borderRadius: '8px', border: 'none', cursor: 'pointer', opacity: query ? 1 : 0.5 }}
+                                className="w-full py-5 bg-gray-900 text-white rounded-[2rem] font-black text-xs tracking-[0.2em] uppercase shadow-xl hover:bg-indigo-600 transition-all disabled:opacity-20"
                             >
-                                Next
+                                Continue
                             </button>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {step === 2 && (
-                    <div>
-                        <h2 style={{ marginBottom: '1rem' }}>Preferences</h2>
+                    {step === 2 && (
+                        <div className="space-y-10">
+                            <div className="space-y-2">
+                                <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em]">Step 02 / Proximity</span>
+                                <h2 className="text-4xl font-black text-gray-900 tracking-tight">Preferences</h2>
+                            </div>
 
-                        <div style={{ marginBottom: '2rem' }}>
-                            <label style={{ display: 'block', marginBottom: '1rem', fontWeight: 'bold' }}>
-                                How far are you willing to travel?
-                                <span style={{ float: 'right', color: '#666' }}>{distance} miles</span>
-                            </label>
-                            <input
-                                type="range"
-                                min="1"
-                                max="50"
-                                value={distance}
-                                onChange={e => setDistance(Number(e.target.value))}
-                                style={{ width: '100%' }}
-                            />
-                        </div>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-end">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Search Radius</label>
+                                    <span className="text-xl font-black text-indigo-600">{distance}mi</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="1"
+                                    max="50"
+                                    value={distance}
+                                    onChange={e => setDistance(Number(e.target.value))}
+                                    className="w-full accent-indigo-600 h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer"
+                                />
+                            </div>
 
-                        <div style={{ marginBottom: '2rem' }}>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer' }}>
+                            <label className="flex items-center gap-4 bg-gray-50 p-6 rounded-3xl cursor-pointer hover:bg-indigo-50/50 transition-colors group border border-transparent hover:border-indigo-100">
                                 <input
                                     type="checkbox"
                                     checked={delivery}
                                     onChange={e => setDelivery(e.target.checked)}
-                                    style={{ width: '20px', height: '20px' }}
+                                    className="w-6 h-6 rounded-xl border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                 />
-                                <span style={{ fontSize: '1.1rem' }}>I want it delivered</span>
+                                <div>
+                                    <span className="text-sm font-black text-gray-900 uppercase tracking-widest block">Local Delivery</span>
+                                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Only show shops that deliver to me</span>
+                                </div>
                             </label>
-                        </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <button onClick={() => setStep(1)} style={{ background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer' }}>Back</button>
+                            <div className="flex gap-4 pt-4">
+                                <button onClick={() => setStep(1)} className="px-8 py-5 text-gray-400 font-black text-[10px] uppercase tracking-widest">Back</button>
+                                <button
+                                    onClick={handleSearch}
+                                    className="flex-1 py-5 bg-indigo-600 text-white rounded-[2rem] font-black text-xs tracking-[0.2em] uppercase shadow-xl shadow-indigo-500/30 hover:bg-indigo-700 transition-all"
+                                >
+                                    {isSearching ? 'Analyzing Network...' : 'Find Matches'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {step === 3 && (
+                        <div className="space-y-8">
+                            <div className="text-center space-y-4">
+                                <div className="w-20 h-20 bg-emerald-50 text-emerald-600 rounded-[2rem] flex items-center justify-center text-3xl mx-auto shadow-sm">🔮</div>
+                                <h3 className="text-2xl font-black text-gray-900 leading-tight">
+                                    {aiInsight || `Discovery Complete`}
+                                </h3>
+                                <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest italic">
+                                    Within {distance} miles • {delivery ? 'Delivery Required' : 'Pickup or Dine-in'}
+                                </div>
+                            </div>
+
+                            <div className="space-y-4 max-h-[350px] overflow-y-auto px-2 scrollbar-hide">
+                                {results.length > 0 ? results.map((business, index) => (
+                                    <div
+                                        key={business.id || index}
+                                        onClick={() => {
+                                            handleClose();
+                                            router.push(`/shop/${business.slug || business.id}`);
+                                        }}
+                                        className="p-6 bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group"
+                                    >
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h4 className="font-black text-lg text-gray-900 group-hover:text-indigo-600 transition-colors uppercase italic">{business.name}</h4>
+                                            <span className="text-indigo-600 text-xl">→</span>
+                                        </div>
+                                        <p className="text-xs text-gray-400 font-medium line-clamp-2 italic leading-relaxed">
+                                            {business.description || "Premium local merchant partner."}
+                                        </p>
+                                        <div className="mt-4 flex gap-2">
+                                            <span className="text-[9px] font-black bg-gray-50 text-gray-400 px-2 py-1 rounded-lg uppercase tracking-widest">{business.location || 'Local'}</span>
+                                        </div>
+                                    </div>
+                                )) : (
+                                    <div className="py-12 text-center text-gray-400 font-medium bg-gray-50 rounded-3xl">
+                                        No exact matches found in your area.
+                                    </div>
+                                )}
+                            </div>
+
                             <button
-                                onClick={handleSearch}
-                                className="btn btn-primary"
-                                style={{ padding: '0.8rem 2rem', backgroundColor: '#000', color: '#fff', borderRadius: '8px', border: 'none', cursor: 'pointer' }}
+                                onClick={handleClose}
+                                className="w-full py-5 bg-gray-100 text-gray-900 rounded-[2rem] font-black text-[10px] tracking-widest uppercase hover:bg-gray-200 transition-all"
                             >
-                                {isSearching ? 'Thinking...' : 'Find Matches'}
+                                New Discovery Search
                             </button>
                         </div>
-                    </div>
-                )}
-
-                {step === 3 && (
-                    <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔮</div>
-                        <h3>{aiInsight || `We found ${results.length} matches for "${query}"`}</h3>
-                        <p style={{ color: '#666', marginBottom: '2rem' }}>Within {distance} miles {delivery ? '(Delivery Available)' : ''}</p>
-
-                        <div style={{ textAlign: 'left', marginBottom: '2rem', maxHeight: '300px', overflowY: 'auto' }}>
-                            {results.length > 0 ? results.map((business, index) => (
-                                <div
-                                    key={business.id || index}
-                                    style={{ padding: '1rem', border: '1px solid #eee', marginBottom: '1rem', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: '#f9f9f9' }}
-                                    onClick={() => router.push(`/shop/${business.slug || business.id}`)}
-                                >
-                                    <strong>{business.name}</strong>
-                                    <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '4px' }}>
-                                        {business.description ? `${business.description.substring(0, 50)}... ` : ''}
-                                        • {business.location || 'Local'}
-                                    </p>
-                                </div>
-                            )) : (
-                                <p style={{ textAlign: 'center', color: '#666' }}>No exact matches found.</p>
-                            )}
-                        </div>
-
-                        <button
-                            onClick={handleClose}
-                            style={{ padding: '0.8rem 2rem', backgroundColor: '#eee', color: '#000', borderRadius: '8px', border: 'none', cursor: 'pointer' }}
-                        >
-                            Close
-                        </button>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
         </div>
     );

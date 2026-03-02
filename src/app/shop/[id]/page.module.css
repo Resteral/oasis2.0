@@ -110,6 +110,9 @@
 .productImage {
     height: 200px;
     background-color: hsl(var(--muted));
+    position: relative;
+    background-size: cover;
+    background-position: center;
 }
 
 .productInfo {
