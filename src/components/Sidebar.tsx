@@ -12,6 +12,7 @@ const navItems = [
     { label: 'Products', href: '/dashboard/products', icon: '📦' },
     { label: 'Posts & Events', href: '/dashboard/posts', icon: '📢' },
     { label: 'Settings', href: '/dashboard/settings', icon: '⚙️' },
+    { label: 'Security (MFA)', href: '/dashboard/settings/security', icon: '🔒' },
 ];
 
 export default function Sidebar() {
