@@ -1,34 +1,40 @@
 :root {
-  /* OasisUnited Premium Palette */
-  --background: 222 47% 11%;     /* Deep Dark Blue */
-  --foreground: 210 40% 98%;     /* Off White */
-  
-  --card: 217 33% 17%;
+  /* OasisUnited Premium Palette - Midnight & Gold */
+  --background: 225 60% 8%;
+  /* Near Black Deep Blue */
+  --foreground: 210 40% 98%;
+  /* Crisp Off White */
+
+  --card: 228 45% 12%;
+  /* Subtle Card Depth */
   --card-foreground: 210 40% 98%;
-  
-  --popover: 222 47% 11%;
+
+  --popover: 225 60% 8%;
   --popover-foreground: 210 40% 98%;
-  
-  --primary: 45 93% 47%;         /* Gold */
-  --primary-foreground: 222 47% 11%;
-  
-  --secondary: 180 100% 35%;     /* Teal */
-  --secondary-foreground: 222 47% 11%;
-  
-  --muted: 217 33% 17%;
+
+  --primary: 43 96% 58%;
+  /* Radiant Oasis Gold */
+  --primary-foreground: 225 60% 8%;
+
+  --secondary: 174 100% 33%;
+  /* Lush Oasis Teal */
+  --secondary-foreground: 225 60% 8%;
+
+  --muted: 228 45% 15%;
   --muted-foreground: 215 20% 65%;
-  
-  --accent: 217 33% 17%;
-  --accent-foreground: 210 40% 98%;
-  
-  --destructive: 0 62.8% 30.6%;
+
+  --accent: 43 96% 58%;
+  --accent-foreground: 225 60% 8%;
+
+  --destructive: 0 84% 60%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 217 33% 20%;
-  --input: 217 33% 17%; /* Darker input background */
-  --ring: 45 93% 47%;
-  
-  --radius: 0.75rem;
+  --border: 228 45% 18%;
+  --input: 228 45% 10%;
+  --ring: 43 96% 58%;
+
+  --radius: 1rem;
+  /* Slightly softer corners for premium feel */
 }
 
 * {
@@ -43,12 +49,17 @@
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
-  font-family: var(--font-geist-sans), sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-geist-sans);
   font-weight: 700;
   letter-spacing: -0.025em;
@@ -83,7 +94,7 @@ h1, h2, h3, h4, h5, h6 {
 .btn-primary {
   background-color: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
-  box-shadow: 0 4px 14px 0 rgba(0,0,0,0.39);
+  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.39);
 }
 
 .btn-primary:hover {
@@ -92,18 +103,18 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-secondary {
-    background-color: hsl(var(--secondary));
-    color: hsl(var(--secondary-foreground));
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
 }
 
 .btn-outline {
-    background-color: transparent;
-    border-color: hsl(var(--border));
-    color: hsl(var(--foreground));
+  background-color: transparent;
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
 }
 
 .btn-outline:hover {
-    background-color: hsl(var(--accent));
+  background-color: hsl(var(--accent));
 }
 
 .card {
@@ -116,27 +127,59 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .input {
-    height: 2.5rem;
-    width: 100%;
-    border-radius: var(--radius);
-    border: 1px solid hsl(var(--border));
-    background-color: hsl(var(--input)); /* Dark input */
-    padding: 0.5rem 0.75rem;
-    font-size: 0.875rem;
-    color: hsl(var(--foreground));
-    outline: none;
-    transition: border-color 0.2s;
+  height: 2.5rem;
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--input));
+  /* Dark input */
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+  outline: none;
+  transition: border-color 0.2s;
 }
 
 .input:focus {
-    border-color: hsl(var(--ring));
-    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
 }
 
-/* Glassmorphism helpers */
+/* Glassmorphism Refined */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Premium Gradients & Animations */
+.oasis-gradient {
+  background: linear-gradient(135deg, hsl(var(--background)), #0f172a, #1e293b);
+  background-size: 400% 400%;
+  animation: gradientFlow 15s ease infinite;
+}
+
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.hover-glow {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.2);
+  transform: translateY(-2px);
 }
