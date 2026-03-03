@@ -1,0 +1,50 @@
+﻿22m[39m[31m[1m^[22m[39
+m[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^[2
+2m[39m
+ [90m 3 |[39m
+ [90m 4 |[39m 
+[36mexport[39m 
+[36mdefault[39m 
+[36mfunction[39m 
+[33mPayPalProvider[39m({ 
+children }[33m:[39m { 
+children[33m:[39m [33mRe
+act[39m[33m.[39m[33mRea
+ctNode[39m }) {
+ [90m 5 |[39m     
+[36mconst[39m 
+initialOptions [33m=[39m 
+{[0m
+
+
+
+Import trace:
+  Server Component:
+    ./oasis_united/src/comp
+onents/PayPalProvider.tsx
+    ./oasis_united/src/app/
+layout.tsx
+
+https://nextjs.org/docs/mes
+sages/module-not-found
+
+
+    at <unknown> (./oasis_u
+nited/src/app/dashboard/set
+tings/page.tsx:5:1)
+    at <unknown> (https://n
+extjs.org/docs/messages/mod
+ule-not-found)
+    at <unknown> (./oasis_u
+nited/src/components/Cart.t
+sx:4:1)
+    at <unknown> (https://n
+extjs.org/docs/messages/mod
+ule-not-found)
+    at <unknown> (./oasis_u
+nited/src/components/PayPal
+Provider.tsx:2:1)
+    at <unknown> (https://n
+extjs.org/docs/messages/mod
+ule-not-found)

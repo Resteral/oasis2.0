@@ -25,10 +25,11 @@ export async function GET(req: Request) {
         }
 
         // 2. Generate Embedding for Seed
+        const seed = seedText.toLowerCase();
         const vector = new Array(1536).fill(0).map((_, i) => {
             let hash = 0;
-            for (let j = 0; j < seedText.length; j++) {
-                hash = (hash << 5) - hash + seedText.charCodeAt(j);
+            for (let j = 0; j < seed.length; j++) {
+                hash = (hash << 5) - hash + seed.charCodeAt(j);
                 hash |= 0;
             }
             return Math.sin(hash + i) * 0.1;

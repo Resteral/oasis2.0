@@ -207,7 +207,7 @@ export default function Marketplace() {
                                 <div key={ad.id} className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-xl border border-yellow-500/30 relative overflow-hidden">
                                     <div className="absolute top-2 right-2 text-xs bg-yellow-500 text-black font-bold px-2 py-1 rounded">AD</div>
                                     <h3 className="font-bold mb-2">{ad.profiles.full_name}</h3>
-                                    <p className="text-sm text-gray-300">{ad.content}</p>
+                                    <p className="text-sm text-gray-300 line-clamp-3 break-words">{ad.content}</p>
                                 </div>
                             ))}
                         </div>
@@ -257,7 +257,7 @@ export default function Marketplace() {
                                     )}
                                 </div>
 
-                                <p className="text-sm text-gray-400 mb-4 line-clamp-2">{pro.bio || 'No bio provided.'}</p>
+                                <p className="text-sm text-gray-400 mb-4 line-clamp-3 break-words">{pro.bio || 'No bio provided.'}</p>
 
                                 <div className="flex flex-wrap gap-2 mb-6">
                                     {(pro.skills || []).slice(0, 3).map(skill => (
@@ -328,7 +328,7 @@ export default function Marketplace() {
                                             </div>
                                             <h4 className="font-bold">{product.name}</h4>
                                             <div className="text-green-400 font-bold">${product.price}</div>
-                                            <p className="text-xs text-gray-400 line-clamp-2 mt-1">{product.description}</p>
+                                            <p className="text-xs text-gray-400 line-clamp-2 mt-1 break-words">{product.description}</p>
                                             <div className="flex gap-2 mt-3">
                                                 <button
                                                     onClick={() => handleOrder(product, false)}

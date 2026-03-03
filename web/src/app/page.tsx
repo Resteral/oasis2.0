@@ -24,7 +24,7 @@ export default function Home() {
           <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-oasis-teal via-oasis-green to-oasis-yellow bg-clip-text text-transparent drop-shadow-lg">
             Oasis
           </h1>
-          <p className="text-2xl md:text-3xl text-gray-200 mb-8 max-w-3xl drop-shadow-md font-medium">
+          <p className="text-2xl md:text-3xl text-gray-200 mb-8 max-w-3xl drop-shadow-md font-medium leading-relaxed">
             The Social Marketplace. Connect, Hire, Spend, and Grow.
           </p>
 

@@ -30,4 +30,6 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.625; /* leading-relaxed to prevent text globbing globally */
+  overflow-wrap: break-word; /* ensure long words or URLs wrap appropriately */
 }

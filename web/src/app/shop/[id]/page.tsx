@@ -98,7 +98,7 @@ export default function ShopPage({ params }: { params: { id: string } }) {
                         </div>
                         <div className="text-center md:text-left flex-1">
                             <h1 className="text-4xl font-bold mb-2" style={textStyle}>{profile.full_name}</h1>
-                            <p className="opacity-80 mb-4 text-lg">{profile.bio || 'Welcome to my page.'}</p>
+                            <p className="opacity-80 mb-4 text-lg whitespace-pre-wrap break-words">{profile.bio || 'Welcome to my page.'}</p>
 
                             <div className="flex flex-wrap justify-center md:justify-start gap-4">
                                 <Link
