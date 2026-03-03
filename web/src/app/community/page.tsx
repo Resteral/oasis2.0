@@ -123,7 +123,7 @@ export default function CommunityPage() {
                                     </div>
                                 </div>
 
-                                <p className="text-gray-300 mb-4 whitespace-pre-wrap">{post.content}</p>
+                                <p className="text-gray-300 mb-4 whitespace-pre-wrap break-words">{post.content}</p>
 
                                 {post.image_url && (
                                     <div className="mb-4 rounded-lg overflow-hidden">

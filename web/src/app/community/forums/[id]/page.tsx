@@ -38,7 +38,7 @@ export default function SingleForumPage({ params }: { params: { id: string } }) 
                     <div className="text-6xl">{forum.icon}</div>
                     <div>
                         <h1 className="text-4xl font-bold mb-2">{forum.title}</h1>
-                        <p className="text-gray-300 text-lg">{forum.description}</p>
+                        <p className="text-gray-300 text-lg whitespace-pre-wrap break-words">{forum.description}</p>
                     </div>
                 </div>
 

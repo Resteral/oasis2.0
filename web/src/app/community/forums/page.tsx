@@ -46,7 +46,7 @@ export default function ForumsList() {
                                         <p className="text-sm text-gray-400">{new Date(forum.created_at).toLocaleDateString()}</p>
                                     </div>
                                 </div>
-                                <p className="text-gray-300 line-clamp-2">{forum.description}</p>
+                                <p className="text-gray-300 line-clamp-2 break-words">{forum.description}</p>
                             </div>
                         </Link>
                     ))}

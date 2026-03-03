@@ -174,7 +174,7 @@ export default function ShopPage({ params }: { params: { id: string } }) {
                                                 <h3 className="font-bold truncate">{product.name}</h3>
                                                 <span className="font-bold text-green-400">${product.price}</span>
                                             </div>
-                                            <p className="text-sm opacity-70 line-clamp-2 mb-4">{product.description}</p>
+                                            <p className="text-sm opacity-70 line-clamp-2 mb-4 break-words">{product.description}</p>
                                             <button
                                                 onClick={() => handleOrder(product)}
                                                 className="w-full bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white py-2 rounded font-bold transition text-sm"
