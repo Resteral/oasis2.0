@@ -1,16 +1,57 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* OasisUnited Premium Palette - Midnight & Gold */
+  --background: 225 60% 8%;
+  --foreground: 210 40% 98%;
+
+  --card: 228 45% 12%;
+  --card-foreground: 210 40% 98%;
+
+  --popover: 225 60% 8%;
+  --popover-foreground: 210 40% 98%;
+
+  --primary: 43 96% 58%;
+  --primary-foreground: 225 60% 8%;
+
+  --secondary: 174 100% 33%;
+  --secondary-foreground: 225 60% 8%;
+
+  --muted: 228 45% 15%;
+  --muted-foreground: 215 20% 65%;
+
+  --accent: 43 96% 58%;
+  --accent-foreground: 225 60% 8%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 228 45% 18%;
+  --input: 228 45% 10%;
+  --ring: 43 96% 58%;
+
+  --radius: 1rem;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
   --color-oasis-teal: #4bc5c0;
   --color-oasis-teal-dark: #379590;
   --color-oasis-green: #294c2b;
@@ -19,17 +60,49 @@
   --color-oasis-road: #1e2022;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.625;
+  overflow-wrap: break-word;
+}
+
+/* Glassmorphism Refined */
+.glass {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Premium Gradients & Animations */
+.oasis-gradient {
+  background: linear-gradient(135deg, hsl(var(--background)), #0f172a, #1e293b);
+  background-size: 400% 400%;
+  animation: gradientFlow 15s ease infinite;
+}
+
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-  line-height: 1.625; /* leading-relaxed to prevent text globbing globally */
-  overflow-wrap: break-word; /* ensure long words or URLs wrap appropriately */
+.hover-glow {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.2);
+  transform: translateY(-2px);
 }
