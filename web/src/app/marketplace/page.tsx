@@ -190,8 +190,8 @@ export default function Marketplace() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
                                 className={`flex items-center gap-3 px-6 py-3 rounded-full font-bold transition-all whitespace-nowrap ${activeTab === tab.id
-                                        ? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] shadow-xl scale-105'
-                                        : 'glass text-[hsl(var(--muted-foreground))] hover:text-white'
+                                    ? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] shadow-xl scale-105'
+                                    : 'glass text-[hsl(var(--muted-foreground))] hover:text-white'
                                     }`}
                             >
                                 <span>{tab.icon}</span>
@@ -344,22 +344,37 @@ export default function Marketplace() {
                 )}
             </main>
 
-            <footer className="max-w-7xl mx-auto px-8 py-32 border-t border-white/5 grid grid-cols-1 md:grid-cols-4 gap-16 opacity-30 italic font-medium">
-                <div className="space-y-6">
-                    <h2 className="text-3xl font-black italic tracking-tighter text-white">Oasis.</h2>
-                    <p className="text-sm">Elevating local independent boutiques into a global discovery engine.</p>
+            <footer className="max-w-7xl mx-auto px-8 py-48 border-t border-white/5 grid grid-cols-1 md:grid-cols-4 gap-24 opacity-30 italic font-medium">
+                <div className="space-y-8">
+                    <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-3xl">🌴</div>
+                    <div className="space-y-4">
+                        <h2 className="text-4xl font-black italic tracking-tighter text-white">United Oasis.</h2>
+                        <p className="text-sm leading-relaxed">Elevating local independent boutiques into a global discovery engine. Built for the community since 2026.</p>
+                    </div>
                 </div>
-                <div className="space-y-4">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-[hsl(var(--primary))]">Network</h4>
-                    <ul className="space-y-2 text-xs"><li>Global Search</li><li>Marketplace</li><li>Pro Services</li></ul>
+                <div className="space-y-8">
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-[hsl(var(--primary))]">Network</h4>
+                    <ul className="space-y-4 text-[10px] font-bold uppercase tracking-widest">
+                        <li><Link href="/discovery">Global Search</Link></li>
+                        <li><Link href="/marketplace">The Marketplace</Link></li>
+                        <li><Link href="/pros">Pro Services</Link></li>
+                    </ul>
                 </div>
-                <div className="space-y-4">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-[hsl(var(--primary))]">Support</h4>
-                    <ul className="space-y-2 text-xs"><li>Order Tracking</li><li>Deliveries</li><li>Terms</li></ul>
+                <div className="space-y-8">
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-[hsl(var(--primary))]">Support</h4>
+                    <ul className="space-y-4 text-[10px] font-bold uppercase tracking-widest">
+                        <li><Link href="/dashboard/orders" className="text-indigo-400">Merchant Portal</Link></li>
+                        <li><Link href="/help">Support Center</Link></li>
+                        <li><Link href="/terms">Legal Terms</Link></li>
+                    </ul>
                 </div>
-                <div className="space-y-4">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-[hsl(var(--primary))]">Social</h4>
-                    <ul className="space-y-2 text-xs"><li>Instagram</li><li>Twitter</li><li>Journal</li></ul>
+                <div className="space-y-8">
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-[hsl(var(--primary))]">Social</h4>
+                    <ul className="space-y-4 text-[10px] font-bold uppercase tracking-widest">
+                        <li><Link href="https://instagram.com">Instagram</Link></li>
+                        <li><Link href="https://twitter.com">Twitter</Link></li>
+                        <li><Link href="/journal">The Journal</Link></li>
+                    </ul>
                 </div>
             </footer>
         </div>

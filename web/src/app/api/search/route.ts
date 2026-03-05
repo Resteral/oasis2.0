@@ -50,7 +50,7 @@ export async function GET(req: Request) {
         .limit(limit);
 
     if (query) {
-        businessQuery = businessQuery.ilike('name', `%${query}%`);
+        businessQuery = businessQuery.or(`name.ilike.%${query}%,location.ilike.%${query}%,category.ilike.%${query}%`);
     }
 
     if (category && category !== 'All') {
@@ -63,7 +63,7 @@ export async function GET(req: Request) {
         success: true,
         results: {
             products: products || [],
-            businesses: businesses || []
+            shops: businesses || []
         }
     });
 }

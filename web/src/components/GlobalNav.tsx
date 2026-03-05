@@ -32,7 +32,7 @@ export default function GlobalNav() {
                             <span className={`text-xl transition-transform duration-500 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
                                 {item.icon}
                             </span>
-                            <span className={`text-[9px] font-black uppercase tracking-widest transition-all ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 group-hover:opacity-40'
+                            <span className={`text-[9px] font-black uppercase tracking-widest transition-all ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-0 group-hover:opacity-100'
                                 }`}>
                                 {item.label}
                             </span>
