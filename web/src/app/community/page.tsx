@@ -66,48 +66,69 @@ export default function CommunityPage() {
     }, [])
 
     return (
-        <div className="min-h-screen bg-gray-900 text-white p-6">
-            <div className="max-w-2xl mx-auto">
-                <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
-                        Oasis Discussions 💬
-                    </h1>
-                    <div className="flex gap-4">
-                        <Link href="/community/forums" className="text-blue-400 hover:text-white font-bold bg-blue-900/30 px-3 py-1 rounded-lg border border-blue-500/30">
-                            Or Explore Forums →
+        <div className="min-h-screen bg-gray-950 text-white p-6 lg:p-12 pb-32">
+            <div className="max-w-3xl mx-auto">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+                    <div>
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_10px_rgba(229,180,80,0.5)]"></span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70 italic">Live Feed</span>
+                        </div>
+                        <h1 className="text-4xl lg:text-5xl font-black italic uppercase tracking-tighter">
+                            Oasis <span className="text-primary italic">Discussions</span>
+                        </h1>
+                    </div>
+                    <div className="flex gap-3">
+                        <Link href="/community/forums" className="bg-white/5 border border-white/10 hover:border-primary/30 text-white px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all glass">
+                            Explore Forums
                         </Link>
-                        <Link href="/dashboard" className="text-gray-400 hover:text-white self-center">Dashboard</Link>
+                        <Link href="/dashboard" className="bg-primary hover:bg-white text-black px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">
+                            Dashboard
+                        </Link>
                     </div>
                 </div>
 
                 {/* Create Post */}
-                <div className="bg-gray-800 p-4 rounded-xl border border-gray-700 mb-8">
-                    <textarea
-                        className="w-full bg-gray-900 border border-gray-600 rounded-lg p-3 text-white mb-2"
-                        placeholder="What's happening in your area?"
-                        rows={3}
-                        value={newPost}
-                        onChange={e => setNewPost(e.target.value)}
-                    />
-                    <div className="flex justify-end">
-                        <button
-                            onClick={handlePost}
-                            className="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg font-bold transition"
-                        >
-                            Post
-                        </button>
+                <div className="bg-gray-900/50 backdrop-blur-xl border border-gray-800 rounded-[2.5rem] p-8 mb-12 shadow-2xl">
+                    <div className="flex gap-4">
+                        <div className="w-12 h-12 bg-gray-800 rounded-2xl flex-shrink-0 flex items-center justify-center text-xl font-bold border border-gray-700">
+                            💬
+                        </div>
+                        <div className="flex-1">
+                            <textarea
+                                className="w-full bg-transparent border-none focus:ring-0 text-white placeholder:text-gray-600 resize-none text-lg font-medium"
+                                placeholder="Broadcast to the Oasis network..."
+                                rows={3}
+                                value={newPost}
+                                onChange={e => setNewPost(e.target.value)}
+                            />
+                            <div className="flex justify-between items-center pt-4 border-t border-gray-800/50">
+                                <div className="flex gap-2">
+                                    <button className="p-2 hover:bg-gray-800 rounded-xl transition-colors opacity-40 hover:opacity-100">🖼️</button>
+                                    <button className="p-2 hover:bg-gray-800 rounded-xl transition-colors opacity-40 hover:opacity-100">📍</button>
+                                </div>
+                                <button
+                                    onClick={handlePost}
+                                    className="bg-primary hover:scale-[1.02] active:scale-[0.98] text-black px-8 py-2.5 rounded-full font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-primary/20"
+                                >
+                                    Transmit
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 {/* Feed */}
                 {loading ? (
-                    <div className="text-center text-gray-400">Loading discussion...</div>
+                    <div className="text-center py-20">
+                        <div className="text-primary font-black animate-pulse uppercase tracking-[0.4em] italic text-sm">Syncing with network...</div>
+                    </div>
                 ) : (
-                    <div className="space-y-6">
+                    <div className="space-y-8">
                         {posts.map(post => (
-                            <div key={post.id} className="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                                <div className="flex items-center gap-4 mb-4">
-                                    <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center font-bold text-lg overflow-hidden flex-shrink-0 border border-gray-600">
+                            <div key={post.id} className="bg-gray-900/40 backdrop-blur-lg border border-gray-800/60 rounded-[3rem] p-10 hover:border-primary/20 transition-all group shadow-xl">
+                                <div className="flex items-center gap-6 mb-8">
+                                    <div className="w-14 h-14 bg-gray-800 rounded-2xl flex items-center justify-center font-bold text-xl overflow-hidden flex-shrink-0 border border-gray-700 group-hover:border-primary/30 transition-all">
                                         {post.profiles?.avatar_url ? (
                                             <img src={post.profiles.avatar_url} alt="Ava" className="w-full h-full object-cover" />
                                         ) : (
@@ -115,37 +136,47 @@ export default function CommunityPage() {
                                         )}
                                     </div>
                                     <div>
-                                        <h3 className="font-bold">
-                                            {post.profiles?.full_name || 'Anonymous'}
-                                            {post.profiles?.role === 'business' && <span className="ml-2 text-xs bg-yellow-500 text-black px-1 rounded">BIZ</span>}
-                                        </h3>
-                                        <div className="text-xs text-gray-400">{new Date(post.created_at).toLocaleDateString()}</div>
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="font-black italic uppercase tracking-tight text-lg">
+                                                {post.profiles?.full_name || 'Anonymous Explorer'}
+                                            </h3>
+                                            {post.profiles?.role === 'business' && (
+                                                <span className="bg-primary text-black text-[8px] font-black px-2 py-0.5 rounded-full uppercase italic tracking-tighter shadow-lg shadow-primary/20">Authorized Merchant</span>
+                                            )}
+                                        </div>
+                                        <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mt-1">
+                                            {new Date(post.created_at).toLocaleDateString()}
+                                        </div>
                                     </div>
                                 </div>
 
-                                <p className="text-gray-300 mb-4 whitespace-pre-wrap break-words">{post.content}</p>
+                                <p className="text-gray-300 text-lg font-medium mb-8 leading-relaxed whitespace-pre-wrap break-words italic">
+                                    "{post.content}"
+                                </p>
 
                                 {post.image_url && (
-                                    <div className="mb-4 rounded-lg overflow-hidden">
-                                        <img src={post.image_url} className="w-full max-h-96 object-cover" />
+                                    <div className="mb-8 rounded-[2rem] overflow-hidden border border-gray-800 shadow-2xl">
+                                        <img src={post.image_url} className="w-full max-h-[500px] object-cover hover:scale-105 transition-transform duration-700" />
                                     </div>
                                 )}
 
-                                <div className="flex gap-6 border-t border-gray-700 pt-4 text-gray-400 text-sm mb-2">
-                                    <button className="hover:text-pink-500 transition flex items-center gap-1">
-                                        ❤️ {post.likes_count}
+                                <div className="flex gap-8 border-t border-gray-800/40 pt-8 mt-12 mx-2">
+                                    <button className="hover:text-primary transition flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+                                        <span className="text-lg">❤️</span> {post.likes_count} Likes
                                     </button>
                                     <button
-                                        className="hover:text-blue-500 transition flex items-center gap-1"
+                                        className="hover:text-primary transition flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
                                         onClick={() => toggleComments(post.id)}
                                     >
-                                        💬 {post.comments_count} Comments
+                                        <span className="text-lg">💬</span> {post.comments_count} Feedback
                                     </button>
                                 </div>
 
                                 {/* Comments Section */}
                                 {expandedPost === post.id && (
-                                    <CommentsSection postId={post.id} />
+                                    <div className="mt-8 pt-8 border-t border-gray-800/20">
+                                        <CommentsSection postId={post.id} />
+                                    </div>
                                 )}
                             </div>
                         ))}

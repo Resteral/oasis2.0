@@ -20,39 +20,70 @@ export default function ForumsList() {
         fetchForums()
     }, [])
 
-    if (loading) return <div className="p-8 text-center text-gray-500">Loading Forums...</div>
+    if (loading) return (
+        <div className="bg-gray-950 min-h-screen p-8 flex items-center justify-center">
+            <div className="text-primary font-black animate-pulse uppercase tracking-[0.4em] italic text-sm">Accessing Network Topics...</div>
+        </div>
+    )
 
     return (
-        <div className="min-h-screen bg-gray-900 text-white p-6">
-            <div className="max-w-4xl mx-auto">
-                <div className="flex justify-between items-center mb-8">
+        <div className="min-h-screen bg-gray-950 text-white p-6 lg:p-12 pb-32">
+            <div className="max-w-5xl mx-auto">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-16">
                     <div>
-                        <h1 className="text-3xl font-bold">Community Forums 💬</h1>
-                        <p className="text-gray-400">Join the discussion in specialized topics.</p>
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="w-2 h-2 bg-primary rounded-full shadow-[0_0_10px_rgba(229,180,80,0.5)]"></span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/70 italic">Specialized Nodes</span>
+                        </div>
+                        <h1 className="text-4xl lg:text-5xl font-black italic uppercase tracking-tighter">
+                            Community <span className="text-primary italic">Forums</span>
+                        </h1>
                     </div>
-                    <Link href="/community/forums/create" className="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg font-bold transition">
-                        + Create Forum
+                    <Link href="/community/forums/create" className="bg-primary hover:bg-white text-black px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-primary/10">
+                        + Initialize Topic
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
                     {forums.map(forum => (
-                        <Link key={forum.id} href={`/community/forums/${forum.id}`}>
-                            <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-blue-500 transition cursor-pointer group">
-                                <div className="flex items-center gap-4 mb-3">
-                                    <div className="text-4xl group-hover:scale-110 transition">{forum.icon || '💬'}</div>
+                        <Link key={forum.id} href={`/community/forums/${forum.id}`} className="group">
+                            <div className="bg-gray-900/40 backdrop-blur-xl p-10 rounded-[3rem] border border-gray-800 shadow-2xl hover:border-primary/20 hover:-translate-y-2 transition-all duration-500 relative overflow-hidden h-full flex flex-col">
+                                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                                    <div className="text-8xl font-black italic">#</div>
+                                </div>
+
+                                <div className="flex items-center gap-6 mb-8 relative z-10">
+                                    <div className="w-16 h-16 bg-gray-800 rounded-[1.5rem] flex items-center justify-center text-3xl overflow-hidden border border-gray-700 group-hover:bg-primary group-hover:text-black transition-colors duration-500">
+                                        {forum.icon || '💬'}
+                                    </div>
                                     <div>
-                                        <h2 className="text-xl font-bold group-hover:text-blue-400 transition">{forum.title}</h2>
-                                        <p className="text-sm text-gray-400">{new Date(forum.created_at).toLocaleDateString()}</p>
+                                        <h2 className="text-2xl font-black italic uppercase tracking-tighter group-hover:text-primary transition-colors">{forum.title}</h2>
+                                        <div className="text-[9px] font-black text-gray-600 uppercase tracking-widest mt-1">
+                                            EST. {new Date(forum.created_at).toLocaleDateString()}
+                                        </div>
                                     </div>
                                 </div>
-                                <p className="text-gray-300 line-clamp-2 break-words">{forum.description}</p>
+
+                                <p className="text-gray-400 font-medium leading-relaxed line-clamp-3 mb-8 flex-1 relative z-10 italic">
+                                    "{forum.description}"
+                                </p>
+
+                                <div className="pt-8 border-t border-gray-800/50 flex justify-between items-center relative z-10">
+                                    <span className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 group-hover:text-primary transition-colors">Enter Network Segment →</span>
+                                    <div className="flex -space-x-2">
+                                        {[1, 2, 3].map(i => (
+                                            <div key={i} className="w-6 h-6 rounded-full bg-gray-800 border-2 border-gray-900 flex items-center justify-center text-[8px] font-bold">👤</div>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         </Link>
                     ))}
+
                     {forums.length === 0 && (
-                        <div className="col-span-2 text-center py-12 border border-dashed border-gray-700 rounded-xl bg-gray-800/50">
-                            No forums yet. Be the first to start a topic!
+                        <div className="col-span-full py-32 text-center bg-gray-900/20 rounded-[3rem] border-2 border-dashed border-gray-800/50">
+                            <p className="text-gray-600 font-black text-[10px] uppercase tracking-widest italic mb-2">No active forums detected in this sector</p>
+                            <p className="text-gray-700 font-bold text-[8px] uppercase tracking-[0.4em]">Initialize a new node to begin engagement</p>
                         </div>
                     )}
                 </div>

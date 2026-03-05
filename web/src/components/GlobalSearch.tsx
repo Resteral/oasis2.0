@@ -25,14 +25,28 @@ export default function GlobalSearch() {
         const delayDebounceFn = setTimeout(async () => {
             if (query.trim().length > 1) {
                 setLoading(true);
-                const apiEndpoint = isAiMode ? `/api/search/v2?q=${encodeURIComponent(query)}` : `/api/search?q=${encodeURIComponent(query)}`;
-                const res = await fetch(apiEndpoint);
-                const data = await res.json();
-                if (data.success) {
-                    setResults(data.results);
+                try {
+                    const apiEndpoint = isAiMode ? `/api/search/v2?q=${encodeURIComponent(query)}` : `/api/search?q=${encodeURIComponent(query)}`;
+                    const res = await fetch(apiEndpoint);
+
+                    if (!res.ok) throw new Error('Network detection failure');
+
+                    const data = await res.json();
+                    if (data.success) {
+                        setResults(data.results);
+                        setIsOpen(true);
+                    } else {
+                        // Handle case where API returns success: false (e.g. Supabase error)
+                        setResults({ products: [], shops: [] });
+                        setIsOpen(true);
+                    }
+                } catch (err) {
+                    console.error("Search failure:", err);
+                    setResults({ products: [], shops: [] });
                     setIsOpen(true);
+                } finally {
+                    setLoading(false);
                 }
-                setLoading(false);
             } else {
                 setResults({ products: [], shops: [] });
                 setIsOpen(false);
@@ -74,8 +88,8 @@ export default function GlobalSearch() {
                                 setQuery('');
                             }}
                             className={`px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${isAiMode
-                                    ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/20'
-                                    : 'bg-white/10 text-white/40 hover:bg-white/20'
+                                ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/20'
+                                : 'bg-white/10 text-white/40 hover:bg-white/20'
                                 }`}
                         >
                             {isAiMode ? 'AI ACTIVE' : 'SWITCH TO AI'}

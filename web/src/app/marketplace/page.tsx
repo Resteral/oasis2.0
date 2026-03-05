@@ -89,13 +89,33 @@ export default function Marketplace() {
         fetchData()
     }, [])
 
+    const [localShops, setLocalShops] = useState<any[]>([])
+
+    const handleSerpApiSearch = async () => {
+        try {
+            const res = await fetch(`/api/places?query=${encodeURIComponent(searchQuery)}&lat=${userLocation.lat}&lng=${userLocation.lng}`)
+            const data = await res.json()
+            if (data.results) {
+                setGooglePlaces(data.results)
+                // If we found external results, switch to a view that might show them
+                // For now we'll just log them or add to a new state
+                console.log("External results found:", data.results.length)
+            }
+        } catch (e) {
+            console.error("External Discovery Failed:", e)
+        }
+    }
+
     const handleSearch = async () => {
         if (!searchQuery.trim()) return
         setLoading(true)
         setLocalProducts([])
+        setLocalShops([])
+        setGooglePlaces([])
 
         try {
-            const { data, error } = await supabase
+            // 1. Search Products
+            const { data: products, error: pError } = await supabase
                 .from('products')
                 .select(`
                     id, name, description, price, image_url, category,
@@ -104,12 +124,35 @@ export default function Marketplace() {
                 .ilike('name', `%${searchQuery}%`)
                 .limit(20)
 
-            if (error) throw error
-            setLocalProducts(data || [])
+            if (pError) throw pError
+            setLocalProducts(products || [])
+
+            // 2. Search Businesses (Local Discovery)
+            const { data: shops, error: bError } = await supabase
+                .from('businesses')
+                .select('*')
+                .or(`name.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%`)
+                .limit(20)
+
+            if (bError) throw bError
+            setLocalShops(shops || [])
+
             setActiveTab('products')
-        } catch (e) {
-            console.error(e)
-            alert('Failed to search local products')
+
+            // Fallback: If no local results, try SerpApi
+            if ((!products || products.length === 0) && (!shops || shops.length === 0)) {
+                console.log("No local results found. Network scan initiated...")
+                await handleSerpApiSearch()
+            }
+
+        } catch (e: any) {
+            console.error("Search Error:", e)
+            if (e.message?.includes('mock') || e.message?.includes('fetch')) {
+                console.warn("Using mock environment - attempting external discovery.")
+                await handleSerpApiSearch()
+            } else {
+                alert('Search connectivity interrupted.')
+            }
         }
         setLoading(false)
     }
@@ -301,34 +344,63 @@ export default function Marketplace() {
                             </div>
                         </div>
 
-                        {localProducts.length > 0 && (
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                                {localProducts.map(product => (
-                                    <div key={product.id} className="group bg-[#121215] rounded-[3rem] border border-white/5 p-2 overflow-hidden hover:border-[hsl(var(--primary))/0.3] transition-all">
-                                        <div className="aspect-square relative rounded-[2.5rem] overflow-hidden bg-white/5">
-                                            {product.image_url ? (
-                                                <img src={product.image_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-5xl opacity-20 grayscale">📦</div>
-                                            )}
-                                        </div>
-                                        <div className="p-8 space-y-6">
-                                            <div className="space-y-1">
-                                                <h4 className="font-black text-lg text-white uppercase tracking-tight truncate">{product.name}</h4>
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-xl font-black text-[hsl(var(--primary))] italic">${product.price}</span>
-                                                    <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">{product.business?.name}</span>
-                                                </div>
-                                            </div>
-                                            <button
-                                                onClick={() => handleOrder(product, false)}
-                                                className="w-full py-4 bg-white/5 rounded-2xl font-black text-[9px] uppercase tracking-widest text-white hover:bg-[hsl(var(--primary))] hover:text-black transition-all"
-                                            >
-                                                Order Delivery
-                                            </button>
+                        {(localProducts.length > 0 || localShops.length > 0) && (
+                            <div className="space-y-16">
+                                {localShops.length > 0 && (
+                                    <div className="space-y-8">
+                                        <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] px-4">Local Boutiques Found</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                            {localShops.map(shop => (
+                                                <Link key={shop.id} href={`/shop/${shop.id}`} className="glass p-8 rounded-[3rem] border border-white/5 hover:border-primary/30 transition-all group flex items-center gap-6">
+                                                    <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-3xl font-black text-primary border border-white/5 group-hover:scale-110 transition-transform shadow-xl">
+                                                        {shop.logo_url ? <img src={shop.logo_url} className="w-full h-full object-cover rounded-2xl" /> : shop.name[0]}
+                                                    </div>
+                                                    <div className="flex-1 overflow-hidden">
+                                                        <h4 className="font-black text-lg text-white uppercase tracking-tight truncate group-hover:text-primary transition-colors">{shop.name}</h4>
+                                                        <p className="text-[10px] text-white/20 font-black uppercase tracking-widest truncate">{shop.location || 'Oasis Network'}</p>
+                                                    </div>
+                                                </Link>
+                                            ))}
                                         </div>
                                     </div>
-                                ))}
+                                )}
+
+                                {googlePlaces.length > 0 && (
+                                    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                                        <div className="flex items-center gap-4 px-4 overflow-hidden relative">
+                                            <div className="flex-1 h-[1px] bg-white/5" />
+                                            <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] whitespace-nowrap">External Discoveries (Global Network)</h3>
+                                            <div className="flex-1 h-[1px] bg-white/5" />
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                            {googlePlaces.map((place: any) => (
+                                                <div key={place.place_id} className="glass p-8 rounded-[3rem] border border-white/5 hover:border-indigo-500/30 transition-all group relative overflow-hidden">
+                                                    <div className="absolute top-4 right-4 text-[8px] font-black text-white/10 uppercase tracking-widest border border-white/5 px-2 py-1 rounded-full">External Signal</div>
+                                                    <div className="flex items-center gap-6">
+                                                        <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-3xl font-black text-indigo-400 border border-white/5 group-hover:scale-110 transition-transform shadow-xl overflow-hidden">
+                                                            {place.image ? <img src={place.image} className="w-full h-full object-cover" /> : '📍'}
+                                                        </div>
+                                                        <div className="flex-1 overflow-hidden">
+                                                            <h4 className="font-black text-lg text-white uppercase tracking-tight truncate group-hover:text-indigo-400 transition-colors">{place.name}</h4>
+                                                            <p className="text-[10px] text-white/20 font-black uppercase tracking-widest truncate">{place.formatted_address}</p>
+                                                            {place.rating && <div className="text-[9px] font-black text-emerald-400 mt-1 uppercase tracking-widest">⭐ {place.rating} / Verified</div>}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {localProducts.length === 0 && localShops.length === 0 && googlePlaces.length === 0 && !loading && (
+                                    <div className="py-24 text-center space-y-4">
+                                        <div className="text-4xl opacity-20 grayscale">📡</div>
+                                        <div className="space-y-2">
+                                            <p className="font-black text-white uppercase tracking-widest text-[10px] opacity-40">No signals detected within range</p>
+                                            <p className="text-white/20 text-[9px] font-bold uppercase tracking-widest italic">Ensure your location services are active or try a broader term.</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </section>
