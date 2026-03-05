@@ -189,12 +189,12 @@ export default function Marketplace() {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`flex items-center gap-3 px-6 py-3 rounded-full font-bold transition-all whitespace-nowrap ${activeTab === tab.id
-                                    ? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] shadow-xl scale-105'
-                                    : 'glass text-[hsl(var(--muted-foreground))] hover:text-white'
+                                className={`flex items-center gap-3 px-8 py-4 rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all whitespace-nowrap snap-center ${activeTab === tab.id
+                                    ? 'bg-[hsl(var(--primary))] text-black shadow-xl scale-105'
+                                    : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white'
                                     }`}
                             >
-                                <span>{tab.icon}</span>
+                                <span className="text-xl">{tab.icon}</span>
                                 {tab.label}
                             </button>
                         ))}
