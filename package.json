@@ -13,23 +13,25 @@
     "@paypal/react-paypal-js": "^8.7.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.89.0",
-    "dotenv": "^17.3.1",
+    "dotenv": "^16.4.5",
     "next": "16.1.1",
     "openai": "^6.15.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "recharts": "^3.6.0",
     "stripe": "^20.1.0",
-    "twilio": "^5.11.1",
-    "dotenv": "^16.4.5"
+    "twilio": "^5.11.1"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.27",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
-    "typescript": "^5",
-    "tsx": "^4.19.2"
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5"
   }
 }

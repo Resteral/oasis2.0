@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 export default function GlobalSearch() {
     const [query, setQuery] = useState('');
-    const [results, setResults] = useState<any>({ products: [], shops: [] });
+    const [results, setResults] = useState<any>({ products: [], businesses: [] });
     const [loading, setLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [isAiMode, setIsAiMode] = useState(false);
@@ -25,16 +25,28 @@ export default function GlobalSearch() {
         const delayDebounceFn = setTimeout(async () => {
             if (query.trim().length > 1) {
                 setLoading(true);
-                const apiEndpoint = isAiMode ? `/api/search/v2?q=${encodeURIComponent(query)}` : `/api/search?q=${encodeURIComponent(query)}`;
-                const res = await fetch(apiEndpoint);
+                let res;
+                if (isAiMode) {
+                    res = await fetch('/api/search/v2', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query })
+                    });
+                } else {
+                    res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+                }
                 const data = await res.json();
                 if (data.success) {
-                    setResults(data.results);
+                    if (isAiMode) {
+                        setResults({ products: data.results, businesses: [] });
+                    } else {
+                        setResults(data.results);
+                    }
                     setIsOpen(true);
                 }
                 setLoading(false);
             } else {
-                setResults({ products: [], shops: [] });
+                setResults({ products: [], businesses: [] });
                 setIsOpen(false);
             }
         }, 500);
@@ -70,12 +82,12 @@ export default function GlobalSearch() {
                         <button
                             onClick={() => {
                                 setIsAiMode(!isAiMode);
-                                setResults({ products: [], shops: [] });
+                                setResults({ products: [], businesses: [] });
                                 setQuery('');
                             }}
                             className={`px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${isAiMode
-                                    ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/20'
-                                    : 'bg-white/10 text-white/40 hover:bg-white/20'
+                                ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/20'
+                                : 'bg-white/10 text-white/40 hover:bg-white/20'
                                 }`}
                         >
                             {isAiMode ? 'AI ACTIVE' : 'SWITCH TO AI'}
@@ -96,12 +108,12 @@ export default function GlobalSearch() {
                             </div>
                         )}
 
-                        {/* Shops Section */}
-                        {results.shops?.length > 0 && (
+                        {/* Businesses Section */}
+                        {results.businesses?.length > 0 && (
                             <div className="space-y-4">
                                 <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] px-6">Curated Boutiques</h3>
                                 <div className="grid grid-cols-1 gap-2">
-                                    {results.shops.map((biz: any) => (
+                                    {results.businesses.map((biz: any) => (
                                         <Link
                                             key={biz.id}
                                             href={`/shop/${biz.id}`}
@@ -166,7 +178,7 @@ export default function GlobalSearch() {
                             </div>
                         )}
 
-                        {(!results.products || results.products.length === 0) && (!results.shops || results.shops.length === 0) && (
+                        {(!results.products || results.products.length === 0) && (!results.businesses || results.businesses.length === 0) && (
                             <div className="py-32 text-center space-y-6">
                                 <span className="text-6xl animate-pulse inline-block grayscale opacity-20">📡</span>
                                 <div className="space-y-2">

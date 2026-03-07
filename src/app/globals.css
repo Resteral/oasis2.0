@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   /* OasisUnited Premium Palette - Midnight & Gold */
   --background: 225 60% 8%;
