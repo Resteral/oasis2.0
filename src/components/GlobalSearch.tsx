@@ -36,14 +36,37 @@ export default function GlobalSearch() {
                     res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
                 }
                 const data = await res.json();
-                if (data.success) {
-                    if (isAiMode) {
-                        setResults({ products: data.results, businesses: [] });
-                    } else {
-                        setResults(data.results);
-                    }
-                    setIsOpen(true);
+
+                let finalBusinesses = data.results?.businesses || [];
+                let finalProducts = data.results?.products || [];
+
+                if (data.success && isAiMode) {
+                    finalProducts = data.results;
+                    finalBusinesses = [];
                 }
+
+                // Fallback to SerpApi if no local businesses found (and we aren't purely in AI product search)
+                if (finalBusinesses.length === 0 && !isAiMode) {
+                    try {
+                        const placesRes = await fetch(`/api/places?query=${encodeURIComponent(query)}`);
+                        const placesData = await placesRes.json();
+                        if (placesData.results && placesData.results.length > 0) {
+                            finalBusinesses = placesData.results.map((p: any) => ({
+                                id: p.place_id,
+                                name: p.name,
+                                location: p.formatted_address,
+                                category: 'Global Discovery',
+                                isExternal: true
+                            }));
+                        }
+                    } catch (e) {
+                        console.error("Places API Default Fallback Error", e);
+                    }
+                }
+
+                setResults({ products: finalProducts, businesses: finalBusinesses });
+                setIsOpen(finalProducts.length > 0 || finalBusinesses.length > 0);
+
                 setLoading(false);
             } else {
                 setResults({ products: [], businesses: [] });
@@ -113,26 +136,50 @@ export default function GlobalSearch() {
                             <div className="space-y-4">
                                 <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] px-6">Curated Boutiques</h3>
                                 <div className="grid grid-cols-1 gap-2">
-                                    {results.businesses.map((biz: any) => (
-                                        <Link
-                                            key={biz.id}
-                                            href={`/shop/${biz.id}`}
-                                            onClick={() => setIsOpen(false)}
-                                            className="flex items-center gap-6 p-6 rounded-[2.5rem] hover:bg-white/5 transition-all group border border-transparent hover:border-white/5"
-                                        >
-                                            <div className="w-16 h-16 bg-white rounded-[1.5rem] flex items-center justify-center text-2xl font-black text-indigo-600 italic group-hover:scale-110 transition-transform shadow-2xl">
-                                                {biz.name[0]}
-                                            </div>
-                                            <div className="flex-1">
-                                                <p className="font-black text-lg text-white group-hover:text-indigo-400 transition-colors tracking-tight uppercase">{biz.name}</p>
-                                                <div className="flex items-center gap-2 pt-0.5">
-                                                    <span className="text-[10px] text-white/20 font-bold uppercase tracking-widest">{biz.location}</span>
-                                                    <span className="w-1 h-1 bg-white/10 rounded-full"></span>
-                                                    <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">{biz.category || 'Boutique'}</span>
+                                    {results.businesses.map((biz: any) => {
+                                        const isExternal = biz.isExternal;
+                                        const Container = isExternal ? 'a' : Link;
+                                        const href = isExternal
+                                            ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(biz.name + ' ' + (biz.location || ''))}`
+                                            : `/shop/${biz.id}`;
+
+                                        return (
+                                            <Container
+                                                key={biz.id}
+                                                href={href as any}
+                                                target={isExternal ? "_blank" : undefined}
+                                                rel={isExternal ? "noopener noreferrer" : undefined}
+                                                onClick={() => !isExternal && setIsOpen(false)}
+                                                className="flex items-center gap-6 p-6 rounded-[2.5rem] hover:bg-white/5 transition-all group border border-transparent hover:border-white/5"
+                                            >
+                                                <div className="w-16 h-16 bg-white rounded-[1.5rem] flex items-center justify-center text-2xl font-black text-indigo-600 italic group-hover:scale-110 transition-transform shadow-2xl relative">
+                                                    {biz.name[0]}
+                                                    {isExternal && (
+                                                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-[10px] text-white shadow-lg border-2 border-[#0d0d0f]">
+                                                            🌍
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            </div>
-                                        </Link>
-                                    ))}
+                                                <div className="flex-1">
+                                                    <div className="flex justify-between items-start">
+                                                        <p className="font-black text-lg text-white group-hover:text-indigo-400 transition-colors tracking-tight uppercase">{biz.name}</p>
+                                                        {isExternal && (
+                                                            <span className="text-[8px] font-black tracking-widest uppercase text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full">
+                                                                Global Network (via Google Maps)
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-2 pt-0.5">
+                                                        <span className="text-[10px] text-white/20 font-bold uppercase tracking-widest">{biz.location}</span>
+                                                        <span className="w-1 h-1 bg-white/10 rounded-full"></span>
+                                                        <span className={`text-[10px] font-bold uppercase tracking-widest ${isExternal ? 'text-emerald-400' : 'text-indigo-400'}`}>
+                                                            {biz.category || 'Boutique'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </Container>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}
