@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from 'react';
-import styles from './page.module.css';
 import { supabase } from '@/lib/supabaseClient';
 import Cart from '@/components/Cart';
 import ChatInterface from '@/components/ChatInterface';
@@ -88,7 +87,7 @@ export default function ShopClient({ business, products, posts }: ShopClientProp
     };
 
     return (
-        <div className={styles.container} style={{ backgroundColor: theme.backgroundColor }}>
+        <div className="min-h-screen" style={{ backgroundColor: theme.backgroundColor }}>
             <style jsx global>{`
                 :root {
                     --primary: ${theme.primaryColor};
@@ -102,10 +101,10 @@ export default function ShopClient({ business, products, posts }: ShopClientProp
                 }
             `}</style>
 
-            <div className={styles.hero} style={{ borderColor: theme.primaryColor }}>
-                <div className={styles.heroContent}>
-                    <h1 className={styles.businessName}>{business.name}</h1>
-                    <p className={styles.tagline}>{business.description || "Welcome to our store!"}</p>
+            <div className="border-b pt-32 pb-16 px-8 text-center" style={{ borderColor: theme.primaryColor }}>
+                <div className="max-w-4xl mx-auto space-y-6">
+                    <h1 className="text-6xl font-black tracking-tighter uppercase italic">{business.name}</h1>
+                    <p className="text-xl font-medium opacity-80 italic">{business.description || "Welcome to our store!"}</p>
 
                     {/* Oasis Delivery Banner */}
                     <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl mb-8 border border-white/20 inline-flex flex-col items-center">
@@ -116,7 +115,7 @@ export default function ShopClient({ business, products, posts }: ShopClientProp
                         </div>
                     </div>
 
-                    <div className={styles.heroActions}>
+                    <div className="flex flex-wrap justify-center gap-4 mt-8">
                         <button className="btn btn-primary" style={{ backgroundColor: theme.primaryColor }}>Start Order</button>
                         <button
                             className={`btn ${isFollowing ? 'btn-outline' : 'glass'}`}
@@ -147,18 +146,18 @@ export default function ShopClient({ business, products, posts }: ShopClientProp
                 </div>
             </div>
 
-            <div className="container">
-                <div className={styles.infoSection}>
-                    <div className={styles.mapPlaceholder}>
-                        <span>📍 {business.location || "Location not set"}</span>
+            <div className="max-w-7xl mx-auto px-8 py-20 space-y-32">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <div className="aspect-video bg-white/5 rounded-[3rem] border border-white/10 flex items-center justify-center">
+                        <span className="font-black uppercase tracking-widest text-[10px] opacity-40">📍 {business.location || "Location not set"}</span>
                     </div>
-                    <div className={styles.details}>
-                        <h3>Visit Us</h3>
+                    <div className="space-y-6 flex flex-col justify-center">
+                        <h3 className="text-3xl font-black italic tracking-tighter uppercase">Visit Us</h3>
                         <p>{business.location}</p>
                         {business.delivery_settings?.selfDelivery && (
                             <p className="text-sm font-medium text-green-600">✓ We deliver locally ({business.delivery_settings.radius} miles)</p>
                         )}
-                        <div className={styles.contactMethods}>
+                        <div className="flex flex-wrap gap-4 pt-6">
                             <button className="btn btn-outline" style={{ borderColor: theme.primaryColor, color: theme.primaryColor }}>Call Now</button>
                             <button className="btn btn-outline" style={{ borderColor: theme.primaryColor, color: theme.primaryColor }} onClick={() => setIsMessageModalOpen(true)}>Message</button>
                             {business.integrations?.facebook?.connected && business.integrations?.facebook?.id && (
@@ -176,21 +175,21 @@ export default function ShopClient({ business, products, posts }: ShopClientProp
                     </div>
                 </div>
 
-                <h2 className={styles.sectionTitle}>Our Menu</h2>
-                <div className={styles.productGrid}>
+                <h2 className="text-4xl font-black italic tracking-tighter uppercase">Our <span className="text-primary">Menu</span></h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                     {products.length > 0 ? products.map((product) => (
-                        <div key={product.id} className={styles.productCard}>
-                            <div className={styles.productImage} style={{ backgroundImage: `url(${product.image_url || 'https://via.placeholder.com/400'})` }}>
+                        <div key={product.id} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[3rem] overflow-hidden flex flex-col group">
+                            <div className="aspect-square relative bg-white/10" style={{ backgroundImage: `url(${product.image_url || 'https://via.placeholder.com/400'})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
                                 {business.delivery_settings?.selfDelivery && (
                                     <div className="absolute top-3 left-3 bg-white/95 backdrop-blur shadow-sm p-1.5 px-3 rounded-full flex items-center gap-1.5 border border-white">
                                         <span className="text-[10px] font-black text-gray-900 uppercase tracking-tighter">Oasis Order</span>
                                     </div>
                                 )}
                             </div>
-                            <div className={styles.productInfo}>
-                                <div className={styles.productHeader}>
-                                    <div>
-                                        <h4>{product.name}</h4>
+                            <div className="p-8 flex-1 flex flex-col space-y-4">
+                                <div className="flex justify-between items-start gap-4">
+                                    <div className="max-w-[70%]">
+                                        <h4 className="font-black text-xl italic uppercase tracking-tight">{product.name}</h4>
                                         <button
                                             onClick={() => {
                                                 setSelectedProduct(product);
@@ -201,9 +200,9 @@ export default function ShopClient({ business, products, posts }: ShopClientProp
                                             ★ View Reviews
                                         </button>
                                     </div>
-                                    <span className={styles.price} style={{ color: theme.primaryColor }}>${product.price}</span>
+                                    <span className="text-2xl font-black italic tracking-tighter" style={{ color: theme.primaryColor }}>${product.price}</span>
                                 </div>
-                                <p className={styles.description}>{product.description}</p>
+                                <p className="text-sm font-medium text-gray-400 italic line-clamp-3">{product.description}</p>
                                 <div className="mt-auto">
                                     {product.stock > 0 ? (
                                         <button
@@ -231,8 +230,8 @@ export default function ShopClient({ business, products, posts }: ShopClientProp
 
                 {/* News & Events Section */}
                 {posts && posts.length > 0 && (
-                    <div className={styles.postsSection} style={{ marginTop: '3rem', marginBottom: '3rem' }}>
-                        <h2 className={styles.sectionTitle}>Latest News & Events</h2>
+                    <div className="space-y-12">
+                        <h2 className="text-4xl font-black italic tracking-tighter uppercase">Latest <span className="text-primary">News</span></h2>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
                             {posts.map((post: any) => (
                                 <div key={post.id} style={{

@@ -1,11 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { PayPalButtons } from '@paypal/react-paypal-js';
-import styles from './Cart.module.css';
-import { AutomationService } from '@/services/automation';
 import { supabase } from '@/lib/supabaseClient';
-import { trackEvent } from '@/services/analytics';
 
 interface CartItem {
     id: string;
@@ -141,18 +137,11 @@ export default function Cart({ businessId, items, setItems }: CartProps) {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Checkout failed');
 
-            // 2. Automation Notify
-            await AutomationService.processOrder({
-                id: data.order.id,
-                customerName,
-                items,
-                total,
-                type: orderType,
-                phone: customerContact.includes('+') ? customerContact : undefined
-            });
+            // 2. Mock Automation Notify
+            console.log("Mock Automation order processed", data.order.id);
 
-            // 3. Track Analytics
-            await trackEvent(businessId, 'purchase', { total, items_count: items.length });
+            // 3. Mock Analytics
+            console.log("Mock Analytics tracked purchase", { total, items_count: items.length });
 
             alert("Order placed successfully! We'll notify you as soon as it's ready.");
             setItems([]);
@@ -177,8 +166,8 @@ export default function Cart({ businessId, items, setItems }: CartProps) {
             });
             const data = await response.json();
             if (data.status === 'COMPLETED') {
-                // Track Analytics
-                await trackEvent(businessId, 'purchase', { total, method: 'paypal' });
+                // Mock Track Analytics
+                console.log("Mock Analytics tracked PayPal purchase", { total, method: 'paypal' });
 
                 setItems([]);
                 setIsOpen(false);
@@ -194,14 +183,14 @@ export default function Cart({ businessId, items, setItems }: CartProps) {
 
     return (
         <>
-            <button className={styles.cartBtn} onClick={() => setIsOpen(true)}>
-                🛒 <span className={styles.badge}>{items.length}</span>
+            <button className="fixed bottom-8 right-8 bg-primary text-black rounded-full px-6 py-4 shadow-[0_10px_40px_rgba(229,180,80,0.3)] z-50 font-black italic uppercase tracking-widest hover:scale-105 transition-transform flex items-center gap-3 border border-primary/50" onClick={() => setIsOpen(true)}>
+                🛒 <span className="bg-black text-primary px-3 py-1 rounded-full text-xs">{items.length}</span>
             </button>
 
             {isOpen && (
-                <div className={styles.overlay}>
-                    <div className={styles.sidebar}>
-                        <div className={styles.header}>
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex justify-end">
+                    <div className="w-full max-w-md bg-gray-950 h-full border-l border-gray-800 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+                        <div className="p-8 border-b border-gray-800/50 flex justify-between items-start glass">
                             <div>
                                 <h2>Your Order</h2>
                                 {userPoints > 0 && (
@@ -210,23 +199,23 @@ export default function Cart({ businessId, items, setItems }: CartProps) {
                                     </p>
                                 )}
                             </div>
-                            <button onClick={() => setIsOpen(false)} className={styles.closeBtn}>✕</button>
+                            <button onClick={() => setIsOpen(false)} className="text-gray-500 hover:text-white transition-colors p-2 text-xl">✕</button>
                         </div>
 
-                        <div className={styles.items}>
+                        <div className="flex-1 overflow-y-auto p-8 space-y-4 custom-scrollbar">
                             {items.length === 0 ? (
-                                <div className={styles.emptyState}>
-                                    <p className={styles.empty}>Your cart is empty.</p>
-                                    <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={() => setIsOpen(false)}>Continue Shopping</button>
+                                <div className="text-center py-12">
+                                    <p className="text-gray-500 font-black italic tracking-widest text-[10px] uppercase">Your cart is empty.</p>
+                                    <button className="bg-primary text-black px-8 py-3 rounded-full font-black text-[9px] uppercase tracking-widest mt-4" onClick={() => setIsOpen(false)}>Continue Shopping</button>
                                 </div>
                             ) : (
                                 items.map((item) => (
-                                    <div key={item.id} className={styles.item}>
-                                        <div className={styles.itemInfo}>
-                                            <p className={styles.itemName}>{item.name}</p>
-                                            <p className={styles.itemPrice}>${Number(item.price).toFixed(2)} x {item.quantity}</p>
+                                    <div key={item.id} className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4 flex justify-between items-center group hover:border-primary/30 transition-colors">
+                                        <div className="flex-1">
+                                            <p className="font-black italic text-white uppercase tracking-tight">{item.name}</p>
+                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">${Number(item.price).toFixed(2)} x {item.quantity}</p>
                                         </div>
-                                        <div className={styles.itemTotal}>
+                                        <div className="font-black italic text-primary text-lg">
                                             ${(Number(item.price) * item.quantity).toFixed(2)}
                                         </div>
                                     </div>
@@ -235,137 +224,120 @@ export default function Cart({ businessId, items, setItems }: CartProps) {
                         </div>
 
                         {items.length > 0 && (
-                            <div className={styles.footer}>
-                                <div className={styles.toggleGroup}>
+                            <div className="p-8 border-t border-gray-800/50 bg-gray-950 glass mt-auto relative z-10">
+                                <div className="flex gap-2">
                                     <button
-                                        className={`${styles.toggleBtn} ${orderType === 'pickup' ? styles.active : ''}`}
+                                        className={`flex-1 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest border transition-all ${orderType === 'pickup' ? 'bg-primary border-primary text-black' : 'border-gray-800 text-gray-500 hover:text-white'}`}
                                         onClick={() => setOrderType('pickup')}
                                     >
                                         Pickup
                                     </button>
                                     <button
-                                        className={`${styles.toggleBtn} ${orderType === 'shipping' ? styles.active : ''}`}
+                                        className={`flex-1 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest border transition-all ${orderType === 'shipping' ? 'bg-primary border-primary text-black' : 'border-gray-800 text-gray-500 hover:text-white'}`}
                                         onClick={() => setOrderType('shipping')}
                                     >
                                         Shipping {vendorTier === 'free' ? '(+$10)' : '(FREE)'}
                                     </button>
                                 </div>
 
-                                <div className={styles.form}>
+                                <div className="space-y-3 mt-8">
                                     <input
                                         type="text"
                                         placeholder="Full Name *"
-                                        className="input"
+                                        className="w-full bg-gray-900 border border-gray-800 rounded-2xl px-6 py-4 text-sm focus:border-primary/50 outline-none text-white italic transition-all"
                                         value={customerName}
                                         onChange={(e) => setCustomerName(e.target.value)}
-                                        style={{ marginBottom: '0.5rem' }}
                                     />
                                     <input
                                         type="text"
                                         placeholder="Email or Phone *"
-                                        className="input"
+                                        className="w-full bg-gray-900 border border-gray-800 rounded-2xl px-6 py-4 text-sm focus:border-primary/50 outline-none text-white italic transition-all"
                                         value={customerContact}
                                         onChange={(e) => setCustomerContact(e.target.value)}
-                                        style={{ marginBottom: '0.5rem' }}
                                     />
                                     {orderType === 'shipping' && (
                                         <input
                                             type="text"
                                             placeholder="Shipping Address *"
-                                            className="input"
+                                            className="w-full bg-gray-900 border border-gray-800 rounded-2xl px-6 py-4 text-sm focus:border-primary/50 outline-none text-white italic transition-all"
                                             value={address}
                                             onChange={(e) => setAddress(e.target.value)}
                                         />
                                     )}
                                 </div>
 
-                                <div className="mt-4 border-t border-gray-100 pt-4">
+                                <div className="mt-8 border-t border-gray-800/50 pt-8">
                                     <div className="flex gap-2">
                                         <input
                                             type="text"
                                             placeholder="Promo Code"
-                                            className="input flex-1 uppercase"
+                                            className="bg-gray-900 border border-gray-800 rounded-2xl px-6 py-4 text-sm focus:border-primary/50 outline-none text-white transition-all uppercase flex-1"
                                             value={promoCode}
                                             onChange={(e) => setPromoCode(e.target.value)}
                                         />
                                         <button
                                             onClick={handleApplyVoucher}
-                                            className="btn btn-outline"
-                                            style={{ padding: '0.5rem 1rem' }}
+                                            className="bg-gray-800 border border-gray-700 text-white px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-700 transition-all"
                                         >
                                             Apply
                                         </button>
                                     </div>
-                                    {voucherError && <p className="text-[10px] text-rose-500 font-bold mt-1 uppercase tracking-tighter">{voucherError}</p>}
-                                    {discount > 0 && <p className="text-[10px] text-emerald-600 font-bold mt-1 uppercase tracking-tighter">Discount Applied: -${discount.toFixed(2)}</p>}
+                                    {voucherError && <p className="text-[10px] text-rose-500 font-bold mt-2 uppercase tracking-tighter">{voucherError}</p>}
+                                    {discount > 0 && <p className="text-[10px] text-emerald-500 font-bold mt-2 uppercase tracking-tighter">Discount Applied: -${discount.toFixed(2)}</p>}
                                 </div>
 
-                                <div className={styles.totalRow}>
-                                    <span>Subtotal</span>
-                                    <span>${subtotal.toFixed(2)}</span>
-                                </div>
-                                {discount > 0 && (
-                                    <div className={styles.totalRow} style={{ color: '#10B981' }}>
-                                        <span>Discount</span>
-                                        <span>-${discount.toFixed(2)}</span>
+                                <div className="space-y-4 font-black italic mt-8 text-lg text-white">
+                                    <div className="flex justify-between items-center text-gray-400">
+                                        <span className="text-[10px] uppercase tracking-widest">Subtotal</span>
+                                        <span>${subtotal.toFixed(2)}</span>
                                     </div>
-                                )}
-                                {orderType === 'shipping' && (
-                                    <div className={styles.totalRow} style={{ fontSize: '1rem', color: 'hsl(var(--muted-foreground))' }}>
-                                        <span>Shipping</span>
-                                        <span>${shippingCost.toFixed(2)}</span>
+                                    {discount > 0 && (
+                                        <div className="flex justify-between items-center text-emerald-400">
+                                            <span className="text-[10px] uppercase tracking-widest">Discount</span>
+                                            <span>-${discount.toFixed(2)}</span>
+                                        </div>
+                                    )}
+                                    {orderType === 'shipping' && (
+                                        <div className="flex justify-between items-center text-gray-500">
+                                            <span className="text-[10px] uppercase tracking-widest">Shipping</span>
+                                            <span>${shippingCost.toFixed(2)}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between items-center text-3xl text-primary border-t border-gray-800/50 pt-4 mt-4">
+                                        <span className="text-[12px] uppercase tracking-widest text-white mt-1">Total</span>
+                                        <span>${total.toFixed(2)}</span>
                                     </div>
-                                )}
-                                <div className={`${styles.totalRow} ${styles.grandTotal}`}>
-                                    <span>Total</span>
-                                    <span>${total.toFixed(2)}</span>
                                 </div>
 
-                                <div className={styles.actions}>
+                                <div className="mt-12 space-y-4">
                                     {customerName && (orderType === 'pickup' || address) ? (
-                                        <div style={{ marginTop: '1rem' }}>
-                                            <PayPalButtons
-                                                style={{ layout: "vertical" }}
-                                                createOrder={async () => {
-                                                    const res = await fetch('/api/orders/create', {
-                                                        method: 'POST',
-                                                        headers: { 'Content-Type': 'application/json' },
-                                                        body: JSON.stringify({
-                                                            businessId,
-                                                            customerName,
-                                                            customerContact,
-                                                            items,
-                                                            total,
-                                                            type: orderType,
-                                                            address
-                                                        }),
-                                                    });
-                                                    const { order } = await res.json();
-                                                    const ppRes = await fetch('/api/paypal/create-order', {
-                                                        method: 'POST',
-                                                        headers: { 'Content-Type': 'application/json' },
-                                                        body: JSON.stringify({ total, orderId: order.id }),
-                                                    });
-                                                    const ppOrder = await ppRes.json();
-                                                    (window as any).currentDbOrderId = order.id;
-                                                    return ppOrder.id;
+                                        <div className="space-y-4">
+                                            <button
+                                                className="w-full bg-[#FFC439] hover:bg-[#F4BB33] text-[#003087] font-black italic rounded-full py-4 transition-colors text-sm tracking-tight"
+                                                onClick={() => {
+                                                    alert("PayPal integration is currently mocked.");
+                                                    handleOrderCapture("MOCK_PAYPAL_ID", Math.random().toString(36).substring(7));
                                                 }}
-                                                onApprove={async (data: any) => {
-                                                    await handleOrderCapture(data.orderID, (window as any).currentDbOrderId);
-                                                }}
-                                            />
+                                            >
+                                                <span className="text-[#003087]">Pay</span><span className="text-[#0079C1]">Pal</span> Checkout
+                                            </button>
+                                            <button
+                                                onClick={handleCheckout}
+                                                className="w-full bg-primary hover:bg-white text-black font-black italic uppercase tracking-tighter text-sm rounded-full py-4 transition-colors"
+                                            >
+                                                Standard Checkout
+                                            </button>
                                         </div>
                                     ) : (
                                         <button
-                                            className="btn btn-primary"
-                                            style={{ width: '100%', marginBottom: '0.5rem' }}
-                                            onClick={handleCheckout}
-                                            disabled={isProcessing}
+                                            className="w-full bg-gray-800 text-gray-500 font-black italic uppercase tracking-tighter text-sm rounded-full py-4 cursor-not-allowed"
                                         >
-                                            {isProcessing ? 'Processing...' : 'Place Order'}
+                                            {isProcessing ? 'Processing' : 'Awaiting Details'}
                                         </button>
                                     )}
-                                    <button className="btn btn-outline" style={{ width: '100%' }} onClick={() => setIsOpen(false)}>Keep Shopping</button>
+                                    <button className="w-full text-center text-[10px] font-black text-gray-500 uppercase tracking-widest hover:text-white transition-colors py-4" onClick={() => setIsOpen(false)}>
+                                        Keep Shopping
+                                    </button>
                                 </div>
                             </div>
                         )}

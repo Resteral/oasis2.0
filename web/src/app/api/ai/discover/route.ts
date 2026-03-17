@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabaseClient';
-import { openai, getEmbedding } from '@/lib/openai';
-
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
@@ -12,7 +10,8 @@ export async function POST(req: NextRequest) {
         }
 
         // 1. Generate Query Embedding
-        const queryEmbedding = await getEmbedding(query);
+        // MOCK: Disabled OpenAI integration
+        const queryEmbedding = Array(1536).fill(0.01);
 
         // 2. Perform Vector Search (matching businesses or products)
         // For discovery, we'll try to find businesses with matching descriptions/products
@@ -25,15 +24,8 @@ export async function POST(req: NextRequest) {
         if (matchError) throw matchError;
 
         // 3. Generate AI Insight using GPT-3.5
-        const insightResponse = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [
-                { role: "system", content: "You are the Oasis AI Discovery expert. You will receive a user query and a list of local matches. Write a 1-sentence catchy summary explaining why these shops are perfect for the user's vibe." },
-                { role: "user", content: `Query: ${query}\nMatches: ${JSON.stringify(matches?.map((m: any) => m.name))}` }
-            ]
-        });
-
-        const aiInsight = insightResponse.choices[0].message.content;
+        // MOCK: Disabled OpenAI integration
+        const aiInsight = "I found some great spots for you!";
 
         return NextResponse.json({
             success: true,
